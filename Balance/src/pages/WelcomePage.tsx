@@ -31,7 +31,7 @@ export function WelcomePage() {
         <ArqWordmark compact />
         <img
           className="welcome-art"
-          src="/assets/welcome-balance-sculpture-v2.webp"
+          src={`${import.meta.env.BASE_URL}assets/welcome-balance-sculpture-v2.webp`}
           alt=""
           width="480"
           height="350"

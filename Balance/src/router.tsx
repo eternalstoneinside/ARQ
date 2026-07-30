@@ -10,6 +10,8 @@ import { TransactionDetailsPage } from './pages/TransactionDetailsPage'
 import { TransactionsPage } from './pages/TransactionsPage'
 import { WelcomePage } from './pages/WelcomePage'
 
+const basename = import.meta.env.BASE_URL === '/' ? '/' : import.meta.env.BASE_URL.replace(/\/$/, '')
+
 export const router = createBrowserRouter([
   { path: '/', element: <LaunchPage /> },
   { path: '/welcome', element: <WelcomePage /> },
@@ -28,4 +30,4 @@ export const router = createBrowserRouter([
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },
-])
+], { basename })
