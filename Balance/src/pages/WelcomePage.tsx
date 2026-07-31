@@ -1,6 +1,16 @@
-import { useState } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useNavigate } from 'react-router'
-import { ArqWordmark } from '../components/brand/ArqWordmark'
+import { LegalNotice } from '../components/legal/LegalNotice'
+import { MotionWordmark } from '../components/motion/MotionWordmark'
+import {
+  buttonVariants,
+  cardVariants,
+  listVariants,
+  pageVariants,
+  reducedButtonVariants,
+  reducedCardVariants,
+  reducedPageVariants,
+} from '../motion/motionTokens'
 
 function GoogleMark() {
   return (
@@ -14,50 +24,60 @@ function GoogleMark() {
 }
 
 export function WelcomePage() {
-  const [message, setMessage] = useState('')
   const navigate = useNavigate()
-
-  const showUnavailable = () => {
-    setMessage('Google-авторизацію буде підключено на наступному етапі.')
-  }
-
-  const showDocumentStatus = (document: string) => {
-    setMessage(`${document} готуються до публікації.`)
-  }
+  const reduceMotion = useReducedMotion()
+  const pageMotion = reduceMotion ? reducedPageVariants : pageVariants
+  const cardMotion = reduceMotion ? reducedCardVariants : cardVariants
+  const buttonMotion = reduceMotion ? reducedButtonVariants : buttonVariants
 
   return (
-    <main className="entry-screen welcome-screen">
-      <section className="welcome-copy entry-reveal">
-        <ArqWordmark compact />
-        <img
-          className="welcome-art"
-          src={`${import.meta.env.BASE_URL}assets/welcome-balance-sculpture-v2.webp`}
-          alt=""
-          width="480"
-          height="350"
-          decoding="async"
-        />
-        <h1>Спільні фінанси.<br />Без хаосу.</h1>
-        <p>ARQ Balance допомагає спокійно вести спільний баланс, бачити внески й зберігати одну зрозумілу історію.</p>
-      </section>
+    <motion.main className="entry-screen welcome-screen" variants={pageMotion} initial="hidden" animate="visible">
+      <motion.section className="welcome-copy" variants={listVariants}>
+        <MotionWordmark wordmarkClassName="welcome-wordmark" />
+        <motion.div className="welcome-intro" variants={cardMotion}>
+          <h1>
+            <span>Спільні фінанси.</span>
+            <strong>Без хаосу.</strong>
+          </h1>
+          <p>Спокійно ведіть спільний баланс, бачте внески й зберігайте розуміння.</p>
+        </motion.div>
+      </motion.section>
 
-      <section className="welcome-actions entry-reveal entry-reveal--delayed" aria-label="Авторизація">
-        <button className="google-button interactive" type="button" onClick={showUnavailable}>
+      <motion.section className="welcome-actions" aria-label="Авторизація" variants={listVariants}>
+        <motion.button
+          className="google-button interactive"
+          type="button"
+          variants={buttonMotion}
+          initial="rest"
+          whileHover="hover"
+          whileTap="tap"
+          onClick={() => navigate('/onboarding')}
+        >
           <GoogleMark />
-          <span>Продовжити з Google</span>
-        </button>
-        <button className="guest-button interactive" type="button" onClick={() => navigate('/app')}>
-          Продовжити без входу
-        </button>
+          <span>Увійти з Google</span>
+        </motion.button>
 
-        <p className="legal-copy">
-          Продовжуючи, ви погоджуєтесь з{' '}
-          <button type="button" onClick={() => showDocumentStatus('Умови використання')}>Умовами використання</button>
-          {' '}та{' '}
-          <button type="button" onClick={() => showDocumentStatus('Політика конфіденційності')}>Політикою конфіденційності</button>.
-        </p>
-        <p className="entry-status" role="status" aria-live="polite">{message}</p>
-      </section>
-    </main>
+        <motion.div className="auth-separator" aria-hidden="true" variants={cardMotion}>
+          <span />
+          <em>або</em>
+          <span />
+        </motion.div>
+
+        <motion.button
+          className="other-signin interactive"
+          type="button"
+          variants={buttonMotion}
+          initial="rest"
+          whileHover="hover"
+          whileTap="tap"
+        >
+          Інші способи входу
+        </motion.button>
+
+        <motion.div className="welcome-legal-motion" variants={cardMotion}>
+          <LegalNotice className="welcome-legal" />
+        </motion.div>
+      </motion.section>
+    </motion.main>
   )
 }

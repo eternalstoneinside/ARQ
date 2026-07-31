@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CalendarDays, ChevronRight, CircleUserRound, Shapes, Text } from 'lucide-react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useForm } from 'react-hook-form'
@@ -8,6 +9,7 @@ import { useTransactions } from '../../context/transactions-context'
 import { categories, people } from '../../data/mock'
 import type { Transaction, TransactionType } from '../../domain/types'
 import { parseAmountToMinor } from '../../lib/format'
+import { modalBackdropVariants, modalVariants, reducedModalVariants } from '../../motion/motionTokens'
 
 const formSchema = z.object({
   type: z.enum(['expense', 'income']),
@@ -25,6 +27,7 @@ type FormValues = z.infer<typeof formSchema>
 
 export function AddTransactionSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { addTransaction } = useTransactions()
+  const reduceMotion = useReducedMotion()
   const {
     register,
     handleSubmit,
@@ -58,8 +61,6 @@ export function AddTransactionSheet({ open, onClose }: { open: boolean; onClose:
     }
   }, [open, onClose])
 
-  if (!open) return null
-
   const onSubmit = (values: FormValues) => {
     const amountMinor = parseAmountToMinor(values.amount)
     if (amountMinor === null) return
@@ -89,14 +90,29 @@ export function AddTransactionSheet({ open, onClose }: { open: boolean; onClose:
   const visibleCategories = categories.filter((category) => category.type === type)
 
   return createPortal(
-    <div
-      className="sheet-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
-    >
-      <section className="transaction-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="sheet-backdrop"
+          role="presentation"
+          variants={reduceMotion ? reducedModalVariants : modalBackdropVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) onClose()
+          }}
+        >
+          <motion.section
+            className="transaction-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sheet-title"
+            variants={reduceMotion ? reducedModalVariants : modalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
         <span className="sheet-handle" aria-hidden="true" />
         <h2 id="sheet-title">Нова операція</h2>
 
@@ -159,8 +175,10 @@ export function AddTransactionSheet({ open, onClose }: { open: boolean; onClose:
 
           <button className="sheet-submit interactive" disabled={isSubmitting} type="submit">Додати операцію</button>
         </form>
-      </section>
-    </div>,
+          </motion.section>
+        </motion.div>
+      )}
+    </AnimatePresence>,
     document.getElementById('sheet-root')!,
   )
 }

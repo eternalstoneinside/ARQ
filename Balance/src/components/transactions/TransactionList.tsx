@@ -1,9 +1,11 @@
+import { motion, useReducedMotion } from 'framer-motion'
 import { Link } from 'react-router'
 import { categories, people } from '../../data/mock'
 import type { Transaction } from '../../domain/types'
 import { formatDate } from '../../lib/format'
 import { Amount } from '../ui/Amount'
 import { CategoryIcon } from '../ui/CategoryIcon'
+import { cardVariants, listVariants, reducedCardVariants } from '../../motion/motionTokens'
 
 export function TransactionList({
   transactions,
@@ -12,8 +14,11 @@ export function TransactionList({
   transactions: Transaction[]
   linkToDetails?: boolean
 }) {
+  const reduceMotion = useReducedMotion()
+  const rowMotion = reduceMotion ? reducedCardVariants : cardVariants
+
   return (
-    <ul className="transaction-list" aria-label="Операції">
+    <motion.ul className="transaction-list" aria-label="Операції" variants={listVariants} initial="hidden" animate="visible">
       {transactions.map((transaction) => {
         const category = categories.find((item) => item.id === transaction.categoryId)
         const person = people.find((item) => item.id === transaction.personId)
@@ -29,15 +34,15 @@ export function TransactionList({
         )
 
         return (
-          <li key={transaction.id}>
+          <motion.li key={transaction.id} variants={rowMotion}>
             {linkToDetails ? (
               <Link className="transaction-row interactive" to={`/app/transactions/${transaction.id}`}>{content}</Link>
             ) : (
               <div className="transaction-row">{content}</div>
             )}
-          </li>
+          </motion.li>
         )
       })}
-    </ul>
+    </motion.ul>
   )
 }

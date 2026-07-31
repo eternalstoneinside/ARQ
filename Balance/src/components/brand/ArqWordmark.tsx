@@ -18,7 +18,7 @@ export function ArqWordmark({ className = '', compact = false, micro = false }: 
         <circle cx="201" cy="36" r="28" />
         <path d="m211 46 26 22" />
       </svg>
-      <span>Balance</span>
+      <span>BALANCE</span>
     </div>
   )
 }

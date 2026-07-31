@@ -1,8 +1,10 @@
 import { ChartNoAxesColumn, Home, Plus, Settings, UsersRound } from 'lucide-react'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { TransactionsProvider } from '../../context/TransactionsContext'
 import { AddTransactionSheet } from '../transactions/AddTransactionSheet'
+import { buttonVariants, reducedButtonVariants } from '../../motion/motionTokens'
 
 const nav = [
   { to: '/app', label: 'Головна', icon: Home },
@@ -13,6 +15,7 @@ const nav = [
 
 export function AppShell() {
   const [sheetOpen, setSheetOpen] = useState(false)
+  const reduceMotion = useReducedMotion()
   const location = useLocation()
   const fullScreen = /^\/app\/transactions\/[^/]+$/.test(location.pathname)
     || location.pathname === '/app/members'
@@ -44,9 +47,17 @@ export function AppShell() {
             ))}
           </nav>
         </div>}
-        {showFab && <button className="arq-fab interactive" aria-label="Додати операцію" onClick={() => setSheetOpen(true)}>
+        {showFab && <motion.button
+          className="arq-fab interactive"
+          aria-label="Додати операцію"
+          variants={reduceMotion ? reducedButtonVariants : buttonVariants}
+          initial="rest"
+          whileHover="hover"
+          whileTap="tap"
+          onClick={() => setSheetOpen(true)}
+        >
           <Plus size={21} strokeWidth={1.65} aria-hidden="true" />
-        </button>}
+        </motion.button>}
       </div>
       <AddTransactionSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
     </TransactionsProvider>

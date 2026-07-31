@@ -1,39 +1,48 @@
 import { useEffect } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { useNavigate } from "react-router";
-import { ArqWordmark } from "../components/brand/ArqWordmark";
+import { MotionWordmark } from "../components/motion/MotionWordmark";
+import { motionTokens } from "../motion/motionTokens";
 
 export function LaunchPage() {
 	const navigate = useNavigate();
+	const reduceMotion = useReducedMotion();
 
 	useEffect(() => {
-		const reduceMotion = window.matchMedia(
-			"(prefers-reduced-motion: reduce)",
-		).matches;
 		const timer = window.setTimeout(
 			() => {
 				navigate("/welcome", { replace: true });
 			},
-			reduceMotion ? 500 : 2200,
+			reduceMotion ? 120 : 1200,
 		);
 
 		return () => window.clearTimeout(timer);
-	}, [navigate]);
+	}, [navigate, reduceMotion]);
 
 	return (
-		<main
+		<motion.main
 			className="entry-screen launch-screen"
 			aria-label="ARQ Balance завантажується"
+			initial={reduceMotion ? { opacity: 0 } : { opacity: 0.94, filter: "brightness(.92)" }}
+			animate={{ opacity: 1, filter: "brightness(1)" }}
+			transition={reduceMotion ? { duration: 0.12 } : motionTokens.spring.screen}
 		>
-			<div className="launch-mark">
-				<ArqWordmark />
-			</div>
+			<MotionWordmark
+				className="launch-mark"
+				initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.995 }}
+				animate={{ opacity: 1, scale: 1 }}
+			/>
 
 			<div className="launch-progress" aria-hidden="true">
 				<div className="launch-progress__track">
-					<span className="launch-progress__value" />
+					<motion.span
+						className="launch-progress__value"
+						initial={{ scaleX: 0 }}
+						animate={{ scaleX: 1 }}
+						transition={reduceMotion ? { duration: 0.1 } : { ...motionTokens.spring.screen, visualDuration: motionTokens.duration.splash }}
+					/>
 				</div>
-				<p>Завантаження</p>
 			</div>
-		</main>
+		</motion.main>
 	);
 }
