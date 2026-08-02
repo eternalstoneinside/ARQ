@@ -1,4 +1,5 @@
 import { createBrowserRouter, Navigate } from 'react-router'
+import { RequireAuth, RequireSpace } from './components/auth/RouteGuards'
 import { AppShell } from './components/layout/AppShell'
 import { AnalyticsPage } from './pages/AnalyticsPage'
 import { CreateSpacePage } from './pages/CreateSpacePage'
@@ -13,28 +14,38 @@ import { SettingsPage } from './pages/SettingsPage'
 import { TransactionDetailsPage } from './pages/TransactionDetailsPage'
 import { TransactionsPage } from './pages/TransactionsPage'
 import { WelcomePage } from './pages/WelcomePage'
+import { AuthCallbackPage } from './pages/AuthCallbackPage'
 
 const basename = import.meta.env.BASE_URL === '/' ? '/' : import.meta.env.BASE_URL.replace(/\/$/, '')
 
 export const router = createBrowserRouter([
   { path: '/', element: <LaunchPage /> },
   { path: '/welcome', element: <WelcomePage /> },
-  { path: '/onboarding', element: <OnboardingDecisionPage /> },
-  { path: '/onboarding/create', element: <CreateSpacePage /> },
-  { path: '/onboarding/invite', element: <InvitePersonPage /> },
-  { path: '/onboarding/join', element: <JoinSpacePage /> },
+  { path: '/auth/callback', element: <AuthCallbackPage /> },
   {
-    path: '/app',
-    element: <AppShell />,
+    element: <RequireAuth />,
     children: [
-      { index: true, element: <HomePage /> },
-      { path: 'analytics', element: <AnalyticsPage /> },
-      { path: 'transactions', element: <TransactionsPage /> },
-      { path: 'transactions/:transactionId', element: <TransactionDetailsPage /> },
-      { path: 'members', element: <MembersPage /> },
-      { path: 'settings', element: <SettingsPage /> },
-      { path: 'empty', element: <EmptyStatePage /> },
-      { path: '*', element: <Navigate to="/app" replace /> },
+      { path: '/onboarding', element: <OnboardingDecisionPage /> },
+      { path: '/onboarding/create', element: <CreateSpacePage /> },
+      { path: '/onboarding/invite', element: <InvitePersonPage /> },
+      { path: '/onboarding/join', element: <JoinSpacePage /> },
+      {
+        element: <RequireSpace />,
+        children: [{
+          path: '/app',
+          element: <AppShell />,
+          children: [
+            { index: true, element: <HomePage /> },
+            { path: 'analytics', element: <AnalyticsPage /> },
+            { path: 'transactions', element: <TransactionsPage /> },
+            { path: 'transactions/:transactionId', element: <TransactionDetailsPage /> },
+            { path: 'members', element: <MembersPage /> },
+            { path: 'settings', element: <SettingsPage /> },
+            { path: 'empty', element: <EmptyStatePage /> },
+            { path: '*', element: <Navigate to="/app" replace /> },
+          ],
+        }],
+      },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },

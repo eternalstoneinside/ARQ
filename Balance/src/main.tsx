@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { LayoutGroup, MotionConfig } from 'framer-motion'
 import { RouterProvider } from 'react-router'
 import { router } from './router'
+import { AuthProvider } from './context/AuthContext'
+import { SpaceProvider } from './context/SpaceContext'
 import './styles.css'
 
 const queryClient = new QueryClient({
@@ -13,11 +15,15 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <MotionConfig reducedMotion="user">
-        <LayoutGroup id="arq-motion-system">
-          <RouterProvider router={router} />
-        </LayoutGroup>
-      </MotionConfig>
+      <AuthProvider>
+        <SpaceProvider>
+          <MotionConfig reducedMotion="user">
+            <LayoutGroup id="arq-motion-system">
+              <RouterProvider router={router} />
+            </LayoutGroup>
+          </MotionConfig>
+        </SpaceProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </StrictMode>,
 )

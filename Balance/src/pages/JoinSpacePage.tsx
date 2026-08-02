@@ -2,6 +2,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { MotionWordmark } from '../components/motion/MotionWordmark'
+import { useSpaces } from '../context/space-context'
 import {
   buttonVariants,
   cardVariants,
@@ -15,7 +16,10 @@ import {
 
 export function JoinSpacePage() {
   const [inviteCode, setInviteCode] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
+  const { joinSpace } = useSpaces()
   const reduceMotion = useReducedMotion()
   const normalizedCode = inviteCode.trim()
   const pageMotion = reduceMotion ? reducedPageVariants : pageVariants
@@ -26,9 +30,18 @@ export function JoinSpacePage() {
     setInviteCode(value.toUpperCase().replace(/[^A-ZА-ЯІЇЄҐ0-9-]/g, ''))
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (normalizedCode.length >= 4) navigate('/app')
+    if (normalizedCode.length < 4 || submitting) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      await joinSpace(normalizedCode)
+      navigate('/app', { replace: true })
+    } catch {
+      setError('Код недійсний, прострочений або вже не активний.')
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -56,14 +69,15 @@ export function JoinSpacePage() {
               type="text"
               value={inviteCode}
               onChange={(event) => handleCodeChange(event.target.value)}
-              placeholder="ARQ-0000"
+              placeholder="ARQ-0000-0000-0000"
               autoComplete="one-time-code"
               autoCapitalize="characters"
               enterKeyHint="done"
-              maxLength={12}
+              maxLength={17}
               spellCheck={false}
             />
             <small>Введіть код без пробілів.</small>
+            {error && <small className="field-error" role="alert">{error}</small>}
           </div>
         </motion.div>
 
@@ -71,13 +85,13 @@ export function JoinSpacePage() {
           <motion.button
             className="onboarding-continue interactive"
             type="submit"
-            disabled={normalizedCode.length < 4}
+            disabled={normalizedCode.length < 4 || submitting}
             variants={buttonMotion}
             initial="rest"
             whileHover="hover"
             whileTap="tap"
           >
-            <span>Приєднатися</span>
+            <span>{submitting ? 'Приєднуємо…' : 'Приєднатися'}</span>
           </motion.button>
         </motion.div>
       </motion.form>

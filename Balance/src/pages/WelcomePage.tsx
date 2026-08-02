@@ -1,7 +1,10 @@
 import { motion, useReducedMotion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { LegalNotice } from '../components/legal/LegalNotice'
 import { MotionWordmark } from '../components/motion/MotionWordmark'
+import { useAuth } from '../context/auth-context'
+import { useSpaces } from '../context/space-context'
 import {
   buttonVariants,
   cardVariants,
@@ -25,10 +28,29 @@ function GoogleMark() {
 
 export function WelcomePage() {
   const navigate = useNavigate()
+  const { configured, loading: authLoading, signInWithGoogle, user } = useAuth()
+  const { activeSpace, loading: spacesLoading } = useSpaces()
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const reduceMotion = useReducedMotion()
   const pageMotion = reduceMotion ? reducedPageVariants : pageVariants
   const cardMotion = reduceMotion ? reducedCardVariants : cardVariants
   const buttonMotion = reduceMotion ? reducedButtonVariants : buttonVariants
+
+  useEffect(() => {
+    if (!authLoading && !spacesLoading && user) navigate(activeSpace ? '/app' : '/onboarding', { replace: true })
+  }, [activeSpace, authLoading, navigate, spacesLoading, user])
+
+  const handleGoogleSignIn = async () => {
+    setSubmitting(true)
+    setError(null)
+    try {
+      await signInWithGoogle()
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Не вдалося розпочати вхід через Google.')
+      setSubmitting(false)
+    }
+  }
 
   return (
     <motion.main className="entry-screen welcome-screen" variants={pageMotion} initial="hidden" animate="visible">
@@ -51,28 +73,15 @@ export function WelcomePage() {
           initial="rest"
           whileHover="hover"
           whileTap="tap"
-          onClick={() => navigate('/onboarding')}
+          disabled={submitting || authLoading || !configured}
+          onClick={() => void handleGoogleSignIn()}
         >
           <GoogleMark />
-          <span>Увійти з Google</span>
+          <span>{submitting ? 'Відкриваємо Google…' : 'Увійти з Google'}</span>
         </motion.button>
 
-        <motion.div className="auth-separator" aria-hidden="true" variants={cardMotion}>
-          <span />
-          <em>або</em>
-          <span />
-        </motion.div>
-
-        <motion.button
-          className="other-signin interactive"
-          type="button"
-          variants={buttonMotion}
-          initial="rest"
-          whileHover="hover"
-          whileTap="tap"
-        >
-          Інші способи входу
-        </motion.button>
+        {error && <motion.p className="entry-error" variants={cardMotion} role="alert">{error}</motion.p>}
+        {!configured && <motion.p className="entry-error" variants={cardMotion} role="alert">Авторизація ще не налаштована для цього середовища.</motion.p>}
 
         <motion.div className="welcome-legal-motion" variants={cardMotion}>
           <LegalNotice className="welcome-legal" />

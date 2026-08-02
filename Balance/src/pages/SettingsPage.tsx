@@ -12,6 +12,8 @@ import {
   WalletCards,
 } from 'lucide-react'
 import { useNavigate } from 'react-router'
+import { useState } from 'react'
+import { useAuth } from '../context/auth-context'
 
 const profileItems = [
   { icon: CircleUserRound, title: 'Особисті дані' },
@@ -28,6 +30,20 @@ const productItems = [
 
 export function SettingsPage() {
   const navigate = useNavigate()
+  const { signOut, user } = useAuth()
+  const [signingOut, setSigningOut] = useState(false)
+  const displayName = String(user?.user_metadata.full_name ?? user?.user_metadata.name ?? 'Користувач ARQ')
+  const initials = displayName.trim().slice(0, 1).toUpperCase() || 'A'
+
+  const handleSignOut = async () => {
+    setSigningOut(true)
+    try {
+      await signOut()
+      navigate('/welcome', { replace: true })
+    } finally {
+      setSigningOut(false)
+    }
+  }
 
   return (
     <article className="subpage settings-page">
@@ -40,8 +56,8 @@ export function SettingsPage() {
       <section className="settings-section profile-section">
         <h2>Профіль</h2>
         <div className="profile-summary">
-          <span className="avatar avatar--1">О</span>
-          <span><strong>Олена</strong><small>olena@example.com</small></span>
+          <span className="avatar avatar--1">{initials}</span>
+          <span><strong>{displayName}</strong><small>{user?.email ?? ''}</small></span>
         </div>
         <div className="settings-list">
           {profileItems.map(({ icon: Icon, title }) => (
@@ -68,8 +84,8 @@ export function SettingsPage() {
         </div>
       </section>
 
-      <button className="danger-link" type="button"><LogOut size={16} />Вийти з акаунту</button>
-      <span className="settings-security"><ShieldCheck size={13} />Дані зберігаються лише у демоверсії</span>
+      <button className="danger-link" type="button" disabled={signingOut} onClick={() => void handleSignOut()}><LogOut size={16} />{signingOut ? 'Виходимо…' : 'Вийти з акаунту'}</button>
+      <span className="settings-security"><ShieldCheck size={13} />Простір захищено політиками доступу</span>
     </article>
   )
 }

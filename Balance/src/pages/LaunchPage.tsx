@@ -3,21 +3,26 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useNavigate } from "react-router";
 import { MotionWordmark } from "../components/motion/MotionWordmark";
 import { motionTokens } from "../motion/motionTokens";
+import { useAuth } from "../context/auth-context";
+import { useSpaces } from "../context/space-context";
 
 export function LaunchPage() {
 	const navigate = useNavigate();
 	const reduceMotion = useReducedMotion();
+	const { loading: authLoading, user } = useAuth();
+	const { activeSpace, loading: spacesLoading } = useSpaces();
 
 	useEffect(() => {
+		if (authLoading || (user && spacesLoading)) return;
 		const timer = window.setTimeout(
 			() => {
-				navigate("/welcome", { replace: true });
+				navigate(user ? (activeSpace ? "/app" : "/onboarding") : "/welcome", { replace: true });
 			},
 			reduceMotion ? 120 : 1200,
 		);
 
 		return () => window.clearTimeout(timer);
-	}, [navigate, reduceMotion]);
+	}, [activeSpace, authLoading, navigate, reduceMotion, spacesLoading, user]);
 
 	return (
 		<motion.main

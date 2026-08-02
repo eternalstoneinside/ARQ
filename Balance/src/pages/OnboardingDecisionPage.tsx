@@ -1,8 +1,11 @@
 import { Layers3, UsersRound } from 'lucide-react'
 import { motion, useReducedMotion, type Variants } from 'framer-motion'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { LegalNotice } from '../components/legal/LegalNotice'
 import { MotionWordmark } from '../components/motion/MotionWordmark'
+import { useAuth } from '../context/auth-context'
+import { useSpaces } from '../context/space-context'
 import {
   cardVariants,
   listVariants,
@@ -46,9 +49,17 @@ function DecisionCard({ description, icon: Icon, primary = false, title, onSelec
 
 export function OnboardingDecisionPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const { activeSpace, loading } = useSpaces()
   const reduceMotion = useReducedMotion()
   const pageMotion = reduceMotion ? reducedPageVariants : pageVariants
   const cardMotion = reduceMotion ? reducedCardVariants : cardVariants
+  const fullName = String(user?.user_metadata.full_name ?? user?.user_metadata.name ?? '').trim()
+  const firstName = fullName.split(/\s+/)[0]
+
+  useEffect(() => {
+    if (!loading && activeSpace) navigate('/app', { replace: true })
+  }, [activeSpace, loading, navigate])
 
   return (
     <motion.main className="entry-screen decision-screen" variants={pageMotion} initial="hidden" animate="visible">
@@ -56,7 +67,7 @@ export function OnboardingDecisionPage() {
         <MotionWordmark wordmarkClassName="decision-wordmark" />
 
         <motion.div className="decision-intro" variants={cardMotion}>
-          <h1>Вітаємо,<br />Дмитро.</h1>
+          <h1>{firstName ? <>Вітаємо,<br />{firstName}.</> : 'Вітаємо.'}</h1>
           <p>Оберіть, як ви хочете почати<br />користуватися ARQ Balance.</p>
         </motion.div>
 

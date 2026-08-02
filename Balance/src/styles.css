@@ -780,6 +780,7 @@ a { color: inherit; text-decoration: none; }
 }
 .google-button:hover { transform: translateY(-1px); background: #fff; box-shadow: 0 19px 44px rgb(68 62 56 / 15%), inset 0 1px 0 rgb(255 255 255 / 94%); }
 .google-button:active { transform: translateY(0) scale(.985); box-shadow: 0 9px 22px rgb(68 62 56 / 11%); }
+.google-button:disabled { cursor: wait; opacity: .68; transform: none; }
 .google-mark { width: 1.35rem; height: 1.35rem; }
 .auth-separator {
   display: grid;
@@ -823,6 +824,29 @@ a { color: inherit; text-decoration: none; }
 }
 .welcome-legal-motion { margin-top: clamp(3rem, 7vh, 4.5rem); }
 .welcome-legal { margin: 0 auto; }
+.entry-error {
+  margin: 1rem auto 0;
+  color: #9b5350;
+  font-size: .7rem;
+  font-weight: 420;
+  line-height: 1.45;
+  text-align: center;
+}
+.field-error { color: #9b5350 !important; }
+
+.route-status {
+  display: grid;
+  height: 100dvh;
+  min-height: 0;
+  place-content: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  background: #f7f6f3;
+  text-align: center;
+}
+.route-status .arq-wordmark { margin-inline: auto; }
+.route-status p { margin: 0; color: #7f817d; font-size: .78rem; letter-spacing: .025em; }
+.route-status--error .onboarding-continue { width: min(18rem, 100%); margin-top: .5rem; }
 
 /* Onboarding decision */
 .decision-screen {
@@ -1153,6 +1177,37 @@ a { color: inherit; text-decoration: none; }
   text-align: left;
   box-shadow: 0 14px 34px rgb(65 60 54 / 5%);
 }
+.invite-code-action { grid-template-columns: 2.4rem minmax(0, 1fr) auto; }
+.invite-code-copy { display: block; min-width: 0; }
+.invite-code-copy small,
+.invite-code-copy strong,
+.invite-code-copy em { display: block; }
+.invite-code-copy small { color: #858683; font-size: .62rem; font-weight: 420; letter-spacing: .04em; }
+.invite-code-copy strong {
+  margin-top: .4rem;
+  overflow: hidden;
+  font-size: .88rem;
+  font-weight: 520;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .07em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.invite-code-copy em { margin-top: .35rem; color: #65726c; font-size: .6rem; font-style: normal; letter-spacing: .02em; }
+.regenerate-invite {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin-top: 1rem;
+  padding: .35rem 0;
+  border: 0;
+  background: transparent;
+  color: #676a66;
+  font-size: .7rem;
+  font-weight: 410;
+  letter-spacing: .015em;
+}
+.regenerate-invite:hover { color: #202224; }
 .invite-person-action span {
   font-size: .9rem;
   font-weight: 420;

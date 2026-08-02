@@ -2,6 +2,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { MotionWordmark } from '../components/motion/MotionWordmark'
+import { useSpaces } from '../context/space-context'
 import {
   buttonVariants,
   cardVariants,
@@ -17,16 +18,28 @@ const examples = ['Дім Дмитра', 'Дім Олени та Андрія', 
 
 export function CreateSpacePage() {
   const [spaceName, setSpaceName] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
+  const { createSpace } = useSpaces()
   const reduceMotion = useReducedMotion()
   const normalizedName = spaceName.trim()
   const pageMotion = reduceMotion ? reducedPageVariants : pageVariants
   const cardMotion = reduceMotion ? reducedCardVariants : cardVariants
   const buttonMotion = reduceMotion ? reducedButtonVariants : buttonVariants
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (normalizedName) navigate('/onboarding/invite')
+    if (!normalizedName || submitting) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      await createSpace(normalizedName)
+      navigate('/onboarding/invite')
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Не вдалося створити простір.')
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -58,6 +71,7 @@ export function CreateSpacePage() {
               autoComplete="off"
               enterKeyHint="next"
             />
+            {error && <small className="field-error" role="alert">{error}</small>}
           </div>
 
           <div className="space-examples" aria-label="Приклади назв">
@@ -84,13 +98,13 @@ export function CreateSpacePage() {
           <motion.button
             className="onboarding-continue interactive"
             type="submit"
-            disabled={!normalizedName}
+            disabled={!normalizedName || submitting}
             variants={buttonMotion}
             initial="rest"
             whileHover="hover"
             whileTap="tap"
           >
-            <span>Продовжити</span>
+            <span>{submitting ? 'Створюємо…' : 'Продовжити'}</span>
           </motion.button>
         </motion.div>
       </motion.form>
