@@ -45,16 +45,16 @@ export function HomePage() {
             <CountUpBalance minor={income - expense} />
           ) : <span className="balance-mask">••••••</span>}
         </div>
-        <p className="balance-caption">Сума всіх активних доходів і витрат у вашому просторі.</p>
+        <p className="balance-caption">Усі активні доходи й витрати<br />у вашому просторі.</p>
       </section>
 
       <section className="money-summary" aria-label="Підсумок доходів і витрат">
         <div>
-          <span><ArrowDownLeft size={15} strokeWidth={1.7} />Доходи</span>
+          <span><ArrowDownLeft size={16} strokeWidth={1.45} />Доходи</span>
           <strong className="positive">+{formatMoney(income)}</strong>
         </div>
         <div>
-          <span><ArrowUpRight size={15} strokeWidth={1.7} />Витрати</span>
+          <span><ArrowUpRight size={16} strokeWidth={1.45} />Витрати</span>
           <strong className="negative">−{formatMoney(expense)}</strong>
         </div>
       </section>
@@ -63,7 +63,7 @@ export function HomePage() {
         <header className="section-heading">
           <div>
             <p>Остання активність</p>
-            <h2 id="recent-title">Операції</h2>
+            <h2 id="recent-title">Нещодавно</h2>
           </div>
           <Link className="text-link interactive" to="/app/transactions">Переглянути всі</Link>
         </header>

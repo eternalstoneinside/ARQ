@@ -21,10 +21,11 @@ export function AppShell() {
     || location.pathname === '/app/members'
     || location.pathname === '/app/settings'
   const showFab = location.pathname === '/app' || location.pathname === '/app/transactions'
+  const isHome = location.pathname === '/app'
 
   return (
     <TransactionsProvider>
-      <div className="app-frame">
+      <div className={`app-frame ${isHome ? 'app-frame--home' : ''}`}>
         <main className={`app-main ${fullScreen ? 'app-main--full' : ''}`}>
           <Outlet context={{ openTransactionSheet: () => setSheetOpen(true) }} />
         </main>
