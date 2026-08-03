@@ -1,14 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CalendarDays, ChevronRight, CircleUserRound, Shapes, Text } from 'lucide-react'
+import { CalendarDays, ChevronRight, CircleUserRound, LoaderCircle, Shapes, Text } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { useTransactions } from '../../context/transactions-context'
-import { categories, people } from '../../data/mock'
+import { useAuth } from '../../context/auth-context'
+import { useSpaces } from '../../context/space-context'
+import { categories } from '../../data/mock'
 import type { Transaction, TransactionType } from '../../domain/types'
 import { parseAmountToMinor } from '../../lib/format'
+import { fetchSpaceMembers, type SpaceMember } from '../../lib/spaceMembers'
 import { modalBackdropVariants, modalVariants, reducedModalVariants } from '../../motion/motionTokens'
 
 const formSchema = z.object({
@@ -25,9 +28,24 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
-export function AddTransactionSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { addTransaction } = useTransactions()
+interface AddTransactionSheetProps {
+  onClose: () => void
+  open: boolean
+  transaction?: Transaction | null
+}
+
+function amountForInput(amountMinor: number) {
+  return (amountMinor / 100).toFixed(2).replace('.', ',')
+}
+
+export function AddTransactionSheet({ open, onClose, transaction = null }: AddTransactionSheetProps) {
+  const { addTransaction, updateTransaction } = useTransactions()
+  const { user } = useAuth()
+  const { activeSpace } = useSpaces()
   const reduceMotion = useReducedMotion()
+  const [members, setMembers] = useState<SpaceMember[]>([])
+  const [membersLoading, setMembersLoading] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const {
     register,
     handleSubmit,
@@ -41,7 +59,7 @@ export function AddTransactionSheet({ open, onClose }: { open: boolean; onClose:
       type: 'expense',
       amount: '',
       categoryId: 'food',
-      personId: 'p1',
+      personId: '',
       date: new Date().toISOString().slice(0, 10),
       comment: '',
     },
@@ -51,7 +69,7 @@ export function AddTransactionSheet({ open, onClose }: { open: boolean; onClose:
   useEffect(() => {
     if (!open) return
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape' && !isSubmitting) onClose()
     }
     document.addEventListener('keydown', onKeyDown)
     document.body.style.overflow = 'hidden'
@@ -59,32 +77,74 @@ export function AddTransactionSheet({ open, onClose }: { open: boolean; onClose:
       document.removeEventListener('keydown', onKeyDown)
       document.body.style.overflow = ''
     }
-  }, [open, onClose])
+  }, [isSubmitting, open, onClose])
 
-  const onSubmit = (values: FormValues) => {
+  useEffect(() => {
+    if (!open || !activeSpace) return
+    let cancelled = false
+    setMembersLoading(true)
+    setSubmitError(null)
+    void fetchSpaceMembers(activeSpace.id)
+      .then((nextMembers) => {
+        if (cancelled) return
+        const visibleMembers = transaction && !nextMembers.some((member) => member.userId === transaction.personId)
+          ? [...nextMembers, {
+              avatarUrl: null,
+              displayName: transaction.personName,
+              joinedAt: transaction.createdAt,
+              role: 'member' as const,
+              userId: transaction.personId,
+            }]
+          : nextMembers
+        setMembers(visibleMembers)
+        const preferred = visibleMembers.find((member) => member.userId === user?.id) ?? visibleMembers[0]
+        reset({
+          type: transaction?.type ?? 'expense',
+          amount: transaction ? amountForInput(transaction.amountMinor) : '',
+          categoryId: transaction?.categoryId ?? 'food',
+          personId: transaction?.personId ?? preferred?.userId ?? '',
+          date: transaction?.transactionDate ?? new Date().toISOString().slice(0, 10),
+          comment: transaction?.comment ?? '',
+        })
+      })
+      .catch((reason) => {
+        if (!cancelled) setSubmitError(reason instanceof Error ? reason.message : 'Не вдалося завантажити учасників.')
+      })
+      .finally(() => {
+        if (!cancelled) setMembersLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [activeSpace, open, reset, transaction, user])
+
+  const onSubmit = async (values: FormValues) => {
     const amountMinor = parseAmountToMinor(values.amount)
     if (amountMinor === null) return
-    const now = new Date().toISOString()
-    const transaction: Transaction = {
-      id: crypto.randomUUID(),
-      coupleSpaceId: 'c1',
-      type: values.type,
-      amountMinor,
-      currency: 'PLN',
-      categoryId: values.categoryId,
-      personId: values.personId,
-      transactionDate: values.date,
-      comment: values.comment.trim() || null,
-      recurrenceId: null,
-      createdBy: values.personId,
-      createdAt: now,
-      updatedAt: now,
-      deletedAt: null,
-      deletedBy: null,
+    setSubmitError(null)
+    try {
+      const input = {
+        type: values.type,
+        amountMinor,
+        categoryId: values.categoryId,
+        personId: values.personId,
+        transactionDate: values.date,
+        comment: values.comment.trim() || null,
+      }
+      if (transaction) await updateTransaction(transaction.id, input)
+      else await addTransaction(input)
+      reset({
+        type: 'expense',
+        amount: '',
+        categoryId: 'food',
+        personId: user?.id ?? members[0]?.userId ?? '',
+        date: new Date().toISOString().slice(0, 10),
+        comment: '',
+      })
+      onClose()
+    } catch (reason) {
+      setSubmitError(reason instanceof Error ? reason.message : 'Не вдалося додати операцію.')
     }
-    addTransaction(transaction)
-    reset()
-    onClose()
   }
 
   const visibleCategories = categories.filter((category) => category.type === type)
@@ -100,7 +160,7 @@ export function AddTransactionSheet({ open, onClose }: { open: boolean; onClose:
           animate="visible"
           exit="exit"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) onClose()
+            if (event.target === event.currentTarget && !isSubmitting) onClose()
           }}
         >
           <motion.section
@@ -113,68 +173,75 @@ export function AddTransactionSheet({ open, onClose }: { open: boolean; onClose:
             animate="visible"
             exit="exit"
           >
-        <span className="sheet-handle" aria-hidden="true" />
-        <h2 id="sheet-title">Нова операція</h2>
+            <span className="sheet-handle" aria-hidden="true" />
+            <h2 id="sheet-title">{transaction ? 'Редагувати операцію' : 'Нова операція'}</h2>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="sheet-type-toggle" aria-label="Тип операції">
-            {(['expense', 'income'] as TransactionType[]).map((value) => (
-              <button
-                className={type === value ? 'is-active' : ''}
-                key={value}
-                type="button"
-                onClick={() => {
-                  setValue('type', value)
-                  setValue('categoryId', value === 'expense' ? 'food' : 'salary')
-                }}
-              >
-                {value === 'expense' ? 'Витрата' : 'Дохід'}
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="sheet-type-toggle" aria-label="Тип операції">
+                {(['expense', 'income'] as TransactionType[]).map((value) => (
+                  <button
+                    className={type === value ? 'is-active' : ''}
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      setValue('type', value)
+                      setValue('categoryId', value === 'expense' ? 'food' : 'salary')
+                    }}
+                  >
+                    {value === 'expense' ? 'Витрата' : 'Дохід'}
+                  </button>
+                ))}
+              </div>
+
+              <label className="sheet-amount">
+                <span>Сума</span>
+                <span className="amount-control">
+                  <input inputMode="decimal" placeholder="0,00" autoFocus {...register('amount')} />
+                  <small>PLN</small>
+                </span>
+                {errors.amount && <em>{errors.amount.message}</em>}
+              </label>
+
+              <div className="sheet-fields">
+                <label>
+                  <Shapes size={16} />
+                  <strong>Категорія</strong>
+                  <select {...register('categoryId')}>
+                    {visibleCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+                  </select>
+                  <ChevronRight size={14} />
+                </label>
+                <label>
+                  <Text size={16} />
+                  <strong>Опис</strong>
+                  <input placeholder="Необов’язково" {...register('comment')} />
+                  <ChevronRight size={14} />
+                </label>
+                <label>
+                  <CalendarDays size={16} />
+                  <strong>Дата</strong>
+                  <input type="date" {...register('date')} />
+                  <ChevronRight size={14} />
+                </label>
+                <label>
+                  <CircleUserRound size={16} />
+                  <strong>Учасник</strong>
+                  <select {...register('personId')}>
+                    {members.map((member) => <option key={member.userId} value={member.userId}>{member.displayName}</option>)}
+                  </select>
+                  <ChevronRight size={14} />
+                </label>
+              </div>
+
+              {errors.personId && <p className="sheet-error" role="alert">{errors.personId.message}</p>}
+              {submitError && <p className="sheet-error" role="alert">{submitError}</p>}
+              <button className="sheet-submit interactive" disabled={isSubmitting || membersLoading || members.length === 0} type="submit">
+                {(isSubmitting || membersLoading) && <LoaderCircle className="sheet-spinner" size={16} aria-hidden="true" />}
+                {isSubmitting
+                  ? transaction ? 'Зберігаємо…' : 'Додаємо…'
+                  : membersLoading ? 'Завантажуємо…' : transaction ? 'Зберегти зміни' : 'Додати операцію'}
               </button>
-            ))}
-          </div>
-
-          <label className="sheet-amount">
-            <span>Сума</span>
-            <span className="amount-control">
-              <input inputMode="decimal" placeholder="0,00" autoFocus {...register('amount')} />
-              <small>PLN</small>
-            </span>
-            {errors.amount && <em>{errors.amount.message}</em>}
-          </label>
-
-          <div className="sheet-fields">
-            <label>
-              <Shapes size={16} />
-              <strong>Категорія</strong>
-              <select {...register('categoryId')}>
-                {visibleCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-              </select>
-              <ChevronRight size={14} />
-            </label>
-            <label>
-              <Text size={16} />
-              <strong>Опис</strong>
-              <input placeholder="Необов’язково" {...register('comment')} />
-              <ChevronRight size={14} />
-            </label>
-            <label>
-              <CalendarDays size={16} />
-              <strong>Дата</strong>
-              <input type="date" {...register('date')} />
-              <ChevronRight size={14} />
-            </label>
-            <label>
-              <CircleUserRound size={16} />
-              <strong>Учасник</strong>
-              <select {...register('personId')}>
-                {people.map((person) => <option key={person.id} value={person.id}>{person.name}</option>)}
-              </select>
-              <ChevronRight size={14} />
-            </label>
-          </div>
-
-          <button className="sheet-submit interactive" disabled={isSubmitting} type="submit">Додати операцію</button>
-        </form>
+            </form>
           </motion.section>
         </motion.div>
       )}

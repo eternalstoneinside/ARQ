@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowUpRight, Eye, EyeOff, Inbox } from 'lucide-react'
+import { AlertCircle, ArrowDownLeft, ArrowUpRight, Eye, EyeOff, Inbox } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
 import { Link } from 'react-router'
@@ -13,7 +13,7 @@ import { productEntryVariants, reducedProductEntryVariants } from '../motion/mot
 export function HomePage() {
   const [balanceVisible, setBalanceVisible] = useState(true)
   const reduceMotion = useReducedMotion()
-  const { transactions } = useTransactions()
+  const { transactions, loading, error } = useTransactions()
   const active = transactions.filter((item) => !item.deletedAt)
   const income = active.filter((item) => item.type === 'income').reduce((sum, item) => sum + item.amountMinor, 0)
   const expense = active.filter((item) => item.type === 'expense').reduce((sum, item) => sum + item.amountMinor, 0)
@@ -68,7 +68,13 @@ export function HomePage() {
           <Link className="text-link interactive" to="/app/transactions">Переглянути всі</Link>
         </header>
 
-        {active.length ? (
+        {loading ? (
+          <div className="activity-loading" role="status" aria-label="Завантаження операцій">
+            <span /><span /><span />
+          </div>
+        ) : error ? (
+          <StateView icon={AlertCircle} title="Не вдалося завантажити операції" description="Перевірте з’єднання й спробуйте ще раз." />
+        ) : active.length ? (
           <TransactionList transactions={active.slice(0, 4)} />
         ) : (
           <StateView icon={Inbox} title="Поки що немає операцій" description="Додайте першу операцію, щоб побачити активність." />

@@ -27,11 +27,18 @@ export type Database = {
         Update: { expires_at?: string; revoked_at?: string | null; used_count?: number }
         Relationships: [{ foreignKeyName: 'space_invites_space_id_fkey'; columns: ['space_id']; isOneToOne: false; referencedRelation: 'spaces'; referencedColumns: ['id'] }]
       }
+      transactions: {
+        Row: { amount_minor: number; category_id: string; comment: string | null; created_at: string; created_by: string; currency: string; deleted_at: string | null; deleted_by: string | null; id: string; person_id: string; person_name: string; space_id: string; transaction_date: string; type: string; updated_at: string }
+        Insert: { amount_minor: number; category_id: string; comment?: string | null; created_at?: string; created_by: string; currency?: string; deleted_at?: string | null; deleted_by?: string | null; id?: string; person_id: string; person_name: string; space_id: string; transaction_date?: string; type: string; updated_at?: string }
+        Update: { amount_minor?: number; category_id?: string; comment?: string | null; created_at?: string; created_by?: string; currency?: string; deleted_at?: string | null; deleted_by?: string | null; id?: string; person_id?: string; person_name?: string; space_id?: string; transaction_date?: string; type?: string; updated_at?: string }
+        Relationships: [{ foreignKeyName: 'transactions_space_id_fkey'; columns: ['space_id']; isOneToOne: false; referencedRelation: 'spaces'; referencedColumns: ['id'] }]
+      }
     }
     Views: { [_ in never]: never }
     Functions: {
       create_space_invite: { Args: { p_space_id: string }; Returns: string }
       create_space_with_invite: { Args: { p_name: string }; Returns: { invite_code: string; space_id: string; space_name: string }[] }
+      delete_transaction: { Args: { p_transaction_id: string }; Returns: undefined }
       join_space_by_code: { Args: { p_code: string }; Returns: string }
       leave_space: { Args: { p_space_id: string }; Returns: undefined }
       remove_space_member: { Args: { p_member_id: string; p_space_id: string }; Returns: undefined }

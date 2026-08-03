@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { Link } from 'react-router'
-import { categories, people } from '../../data/mock'
+import { categories } from '../../data/mock'
 import type { Transaction } from '../../domain/types'
 import { formatDate } from '../../lib/format'
 import { Amount } from '../ui/Amount'
@@ -21,13 +21,12 @@ export function TransactionList({
     <motion.ul className="transaction-list" aria-label="Операції" variants={listVariants} initial="hidden" animate="visible">
       {transactions.map((transaction) => {
         const category = categories.find((item) => item.id === transaction.categoryId)
-        const person = people.find((item) => item.id === transaction.personId)
         const content = (
           <>
             <CategoryIcon icon={category?.icon} type={transaction.type} size="sm" />
             <span className="transaction-copy">
               <strong>{category?.name}</strong>
-              <small>{person?.name} · {formatDate(transaction.transactionDate)}</small>
+              <small>{transaction.personName} · {formatDate(transaction.transactionDate)}</small>
             </span>
             <Amount minor={transaction.amountMinor} type={transaction.type} />
           </>
