@@ -5,6 +5,7 @@ import {
   CircleHelp,
   CircleUserRound,
   Languages,
+  Layers3,
   LockKeyhole,
   LogOut,
   MoonStar,
@@ -14,6 +15,7 @@ import {
 import { useNavigate } from 'react-router'
 import { useState } from 'react'
 import { useAuth } from '../context/auth-context'
+import { useSpaces } from '../context/space-context'
 
 const profileItems = [
   { icon: CircleUserRound, title: 'Особисті дані' },
@@ -31,6 +33,7 @@ const productItems = [
 export function SettingsPage() {
   const navigate = useNavigate()
   const { signOut, user } = useAuth()
+  const { spaces } = useSpaces()
   const [signingOut, setSigningOut] = useState(false)
   const displayName = String(user?.user_metadata.full_name ?? user?.user_metadata.name ?? 'Користувач ARQ')
   const initials = displayName.trim().slice(0, 1).toUpperCase() || 'A'
@@ -73,6 +76,12 @@ export function SettingsPage() {
       <section className="settings-section">
         <h2>Продукт</h2>
         <div className="settings-list">
+          <button type="button" onClick={() => navigate('/app/settings/spaces')}>
+            <Layers3 size={17} strokeWidth={1.55} />
+            <strong>Простори</strong>
+            <small>{spaces.length}</small>
+            <ChevronRight size={14} />
+          </button>
           {productItems.map(({ icon: Icon, title, detail }) => (
             <button type="button" key={title}>
               <Icon size={17} strokeWidth={1.55} />

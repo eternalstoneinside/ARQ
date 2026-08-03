@@ -11,6 +11,7 @@ import { LaunchPage } from './pages/LaunchPage'
 import { MembersPage } from './pages/MembersPage'
 import { OnboardingDecisionPage } from './pages/OnboardingDecisionPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { SpacesPage } from './pages/SpacesPage'
 import { TransactionDetailsPage } from './pages/TransactionDetailsPage'
 import { TransactionsPage } from './pages/TransactionsPage'
 import { WelcomePage } from './pages/WelcomePage'
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
             { path: 'transactions/:transactionId', element: <TransactionDetailsPage /> },
             { path: 'members', element: <MembersPage /> },
             { path: 'settings', element: <SettingsPage /> },
+            { path: 'settings/spaces', element: <SpacesPage /> },
             { path: 'empty', element: <EmptyStatePage /> },
             { path: '*', element: <Navigate to="/app" replace /> },
           ],

@@ -4,10 +4,10 @@ export type Database = {
   public: {
     Tables: {
       profiles: {
-        Row: { avatar_url: string | null; created_at: string; display_name: string; id: string; updated_at: string }
-        Insert: { avatar_url?: string | null; created_at?: string; display_name?: string; id: string; updated_at?: string }
-        Update: { avatar_url?: string | null; display_name?: string; updated_at?: string }
-        Relationships: []
+        Row: { active_space_id: string | null; avatar_url: string | null; created_at: string; display_name: string; id: string; updated_at: string }
+        Insert: { active_space_id?: string | null; avatar_url?: string | null; created_at?: string; display_name?: string; id: string; updated_at?: string }
+        Update: { active_space_id?: string | null; avatar_url?: string | null; display_name?: string; updated_at?: string }
+        Relationships: [{ foreignKeyName: 'profiles_active_space_id_fkey'; columns: ['active_space_id']; isOneToOne: false; referencedRelation: 'spaces'; referencedColumns: ['id'] }]
       }
       spaces: {
         Row: { created_at: string; created_by: string; id: string; name: string; updated_at: string }
@@ -33,6 +33,10 @@ export type Database = {
       create_space_invite: { Args: { p_space_id: string }; Returns: string }
       create_space_with_invite: { Args: { p_name: string }; Returns: { invite_code: string; space_id: string; space_name: string }[] }
       join_space_by_code: { Args: { p_code: string }; Returns: string }
+      leave_space: { Args: { p_space_id: string }; Returns: undefined }
+      remove_space_member: { Args: { p_member_id: string; p_space_id: string }; Returns: undefined }
+      revoke_space_invites: { Args: { p_space_id: string }; Returns: undefined }
+      transfer_space_ownership: { Args: { p_new_owner_id: string; p_space_id: string }; Returns: undefined }
     }
     Enums: { [_ in never]: never }
     CompositeTypes: { [_ in never]: never }

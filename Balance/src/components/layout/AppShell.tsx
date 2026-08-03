@@ -19,7 +19,7 @@ export function AppShell() {
   const location = useLocation()
   const fullScreen = /^\/app\/transactions\/[^/]+$/.test(location.pathname)
     || location.pathname === '/app/members'
-    || location.pathname === '/app/settings'
+    || location.pathname.startsWith('/app/settings')
   const showFab = location.pathname === '/app' || location.pathname === '/app/transactions'
   const isHome = location.pathname === '/app'
 

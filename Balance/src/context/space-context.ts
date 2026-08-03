@@ -9,8 +9,12 @@ export interface SpaceContextValue {
   spaces: Space[]
   createSpace: (name: string) => Promise<Space>
   createInvite: () => Promise<string>
+  deleteSpace: (spaceId: string) => Promise<Space[]>
   joinSpace: (code: string) => Promise<Space>
   refreshSpaces: () => Promise<Space[]>
+  renameSpace: (spaceId: string, name: string) => Promise<Space>
+  revokeInvite: () => Promise<void>
+  setActiveSpace: (spaceId: string) => Promise<Space>
 }
 
 export const SpaceContext = createContext<SpaceContextValue | null>(null)
