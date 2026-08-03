@@ -1,10 +1,13 @@
 import { ChartNoAxesColumn, Home, Plus, Settings, UsersRound } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { TransactionsProvider } from '../../context/TransactionsContext'
-import { AddTransactionSheet } from '../transactions/AddTransactionSheet'
 import { buttonVariants, reducedButtonVariants } from '../../motion/motionTokens'
+
+const loadAddTransactionSheet = () => import('../transactions/AddTransactionSheet')
+const AddTransactionSheet = lazy(() => loadAddTransactionSheet()
+  .then((module) => ({ default: module.AddTransactionSheet })))
 
 const nav = [
   { to: '/app', label: 'Головна', icon: Home },
@@ -22,12 +25,16 @@ export function AppShell() {
     || location.pathname.startsWith('/app/settings')
   const showFab = location.pathname === '/app' || location.pathname === '/app/transactions'
   const isHome = location.pathname === '/app'
+  const openTransactionSheet = () => {
+    void loadAddTransactionSheet()
+    setSheetOpen(true)
+  }
 
   return (
     <TransactionsProvider>
       <div className={`app-frame ${isHome ? 'app-frame--home' : ''}`}>
         <main className={`app-main ${fullScreen ? 'app-main--full' : ''}`}>
-          <Outlet context={{ openTransactionSheet: () => setSheetOpen(true) }} />
+          <Outlet context={{ openTransactionSheet }} />
         </main>
         {!fullScreen && <div className="bottom-bar">
           <nav className="bottom-nav" aria-label="Основна навігація">
@@ -55,12 +62,18 @@ export function AppShell() {
           initial="rest"
           whileHover="hover"
           whileTap="tap"
-          onClick={() => setSheetOpen(true)}
+          onFocus={() => void loadAddTransactionSheet()}
+          onPointerEnter={() => void loadAddTransactionSheet()}
+          onClick={openTransactionSheet}
         >
           <Plus size={21} strokeWidth={1.65} aria-hidden="true" />
         </motion.button>}
       </div>
-      <AddTransactionSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
+      {sheetOpen && (
+        <Suspense fallback={null}>
+          <AddTransactionSheet open onClose={() => setSheetOpen(false)} />
+        </Suspense>
+      )}
     </TransactionsProvider>
   )
 }

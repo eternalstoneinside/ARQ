@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Transaction, TransactionInput, TransactionType } from '../domain/types'
+import { transactionErrorMessage } from '../lib/errors'
 import { getSupabase } from '../lib/supabase'
 import type { Database } from '../types/database'
 import { useAuth } from './auth-context'
@@ -28,6 +29,19 @@ function toTransaction(row: TransactionRow): Transaction {
   }
 }
 
+function sortTransactions(items: Transaction[]) {
+  return [...items].sort((first, second) =>
+    second.transactionDate.localeCompare(first.transactionDate)
+    || second.createdAt.localeCompare(first.createdAt))
+}
+
+function upsertTransaction(items: Transaction[], next: Transaction) {
+  return sortTransactions([
+    next,
+    ...items.filter((transaction) => transaction.id !== next.id),
+  ])
+}
+
 export function TransactionsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const { activeSpace } = useSpaces()
@@ -35,8 +49,9 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const requestId = useRef(0)
+  const mutationLocks = useRef(new Set<string>())
 
-  const refreshTransactions = useCallback(async () => {
+  const fetchTransactions = useCallback(async (showLoading: boolean, surfaceError: boolean) => {
     const currentRequest = ++requestId.current
     if (!activeSpace || !user) {
       setTransactions([])
@@ -44,8 +59,8 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
       return []
     }
 
-    setLoading(true)
-    setError(null)
+    if (showLoading) setLoading(true)
+    if (surfaceError) setError(null)
     const { data, error: queryError } = await getSupabase()
       .from('transactions')
       .select('*')
@@ -56,29 +71,102 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
 
     if (queryError) {
       if (currentRequest !== requestId.current) return []
-      const message = queryError.message || 'Не вдалося завантажити операції.'
-      setError(message)
-      setLoading(false)
+      if (surfaceError) {
+        setError(transactionErrorMessage(queryError, 'Не вдалося завантажити операції.'))
+      }
+      if (showLoading) setLoading(false)
       throw queryError
     }
 
     const next = data.map(toTransaction)
     if (currentRequest !== requestId.current) return next
-    setTransactions(next)
-    setLoading(false)
+    setTransactions(sortTransactions(next))
+    setError(null)
+    if (showLoading) setLoading(false)
     return next
   }, [activeSpace, user])
+
+  const refreshTransactions = useCallback(
+    () => fetchTransactions(true, true),
+    [fetchTransactions],
+  )
+
+  const refreshInBackground = useCallback(
+    () => fetchTransactions(false, false),
+    [fetchTransactions],
+  )
 
   useEffect(() => {
     void refreshTransactions().catch(() => undefined)
   }, [refreshTransactions])
+
+  useEffect(() => {
+    if (!activeSpace || !user) return
+
+    const client = getSupabase()
+    let disposed = false
+    let refreshTimer: ReturnType<typeof setTimeout> | null = null
+    let channel: ReturnType<typeof client.channel> | null = null
+
+    const scheduleRefresh = () => {
+      if (disposed) return
+      if (refreshTimer) clearTimeout(refreshTimer)
+      refreshTimer = setTimeout(() => {
+        refreshTimer = null
+        void refreshInBackground().catch(() => undefined)
+      }, 80)
+    }
+
+    const connect = async () => {
+      await client.realtime.setAuth()
+      if (disposed) return
+
+      channel = client
+        .channel(`space:${activeSpace.id}:transactions`, {
+          config: { private: true },
+        })
+        .on('broadcast', { event: '*' }, scheduleRefresh)
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') scheduleRefresh()
+        })
+    }
+
+    const handleOnline = () => scheduleRefresh()
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') scheduleRefresh()
+    }
+
+    window.addEventListener('online', handleOnline)
+    document.addEventListener('visibilitychange', handleVisibility)
+    void connect().catch(() => undefined)
+
+    return () => {
+      disposed = true
+      if (refreshTimer) clearTimeout(refreshTimer)
+      window.removeEventListener('online', handleOnline)
+      document.removeEventListener('visibilitychange', handleVisibility)
+      if (channel) void client.removeChannel(channel)
+    }
+  }, [activeSpace, refreshInBackground, user])
+
+  const withMutationLock = useCallback(async <Result,>(key: string, mutation: () => Promise<Result>) => {
+    if (mutationLocks.current.has(key)) {
+      throw new Error('Ця операція вже виконується.')
+    }
+    mutationLocks.current.add(key)
+    try {
+      return await mutation()
+    } finally {
+      mutationLocks.current.delete(key)
+    }
+  }, [])
 
   const value = useMemo(() => ({
     transactions,
     error,
     loading,
     refreshTransactions,
-    addTransaction: async (input: TransactionInput) => {
+    addTransaction: (input: TransactionInput) => withMutationLock('create', async () => {
       if (!activeSpace || !user) throw new Error('Оберіть простір і увійдіть до ARQ.')
       setError(null)
       const { data, error: insertError } = await getSupabase()
@@ -99,16 +187,14 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
         .single()
 
       if (insertError) {
-        setError(insertError.message)
-        throw insertError
+        const message = transactionErrorMessage(insertError, 'Не вдалося додати операцію.')
+        throw new Error(message)
       }
       const created = toTransaction(data)
-      setTransactions((current) => [created, ...current].sort((first, second) =>
-        second.transactionDate.localeCompare(first.transactionDate)
-        || second.createdAt.localeCompare(first.createdAt)))
+      setTransactions((current) => upsertTransaction(current, created))
       return created
-    },
-    updateTransaction: async (transactionId: string, input: TransactionInput) => {
+    }),
+    updateTransaction: (transactionId: string, input: TransactionInput) => withMutationLock(`update:${transactionId}`, async () => {
       if (!activeSpace) throw new Error('Оберіть простір.')
       setError(null)
       const { data, error: updateError } = await getSupabase()
@@ -128,17 +214,14 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
         .single()
 
       if (updateError) {
-        setError(updateError.message)
-        throw updateError
+        const message = transactionErrorMessage(updateError, 'Не вдалося зберегти зміни.')
+        throw new Error(message)
       }
       const updated = toTransaction(data)
-      setTransactions((current) => current
-        .map((transaction) => transaction.id === updated.id ? updated : transaction)
-        .sort((first, second) => second.transactionDate.localeCompare(first.transactionDate)
-          || second.createdAt.localeCompare(first.createdAt)))
+      setTransactions((current) => upsertTransaction(current, updated))
       return updated
-    },
-    deleteTransaction: async (transactionId: string) => {
+    }),
+    deleteTransaction: (transactionId: string) => withMutationLock(`delete:${transactionId}`, async () => {
       if (!activeSpace || !user) throw new Error('Оберіть простір і увійдіть до ARQ.')
       setError(null)
       const transaction = transactions.find((item) => item.id === transactionId && item.spaceId === activeSpace.id)
@@ -146,12 +229,12 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
       const { error: deleteError } = await getSupabase().rpc('delete_transaction', { p_transaction_id: transactionId })
 
       if (deleteError) {
-        setError(deleteError.message)
-        throw deleteError
+        const message = transactionErrorMessage(deleteError, 'Не вдалося видалити операцію.')
+        throw new Error(message)
       }
       setTransactions((current) => current.filter((transaction) => transaction.id !== transactionId))
-    },
-  }), [activeSpace, error, loading, refreshTransactions, transactions, user])
+    }),
+  }), [activeSpace, error, loading, refreshTransactions, transactions, user, withMutationLock])
 
   return <TransactionsContext.Provider value={value}>{children}</TransactionsContext.Provider>
 }

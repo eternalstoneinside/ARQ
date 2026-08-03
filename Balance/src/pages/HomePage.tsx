@@ -13,7 +13,7 @@ import { productEntryVariants, reducedProductEntryVariants } from '../motion/mot
 export function HomePage() {
   const [balanceVisible, setBalanceVisible] = useState(true)
   const reduceMotion = useReducedMotion()
-  const { transactions, loading, error } = useTransactions()
+  const { transactions, loading, error, refreshTransactions } = useTransactions()
   const active = transactions.filter((item) => !item.deletedAt)
   const income = active.filter((item) => item.type === 'income').reduce((sum, item) => sum + item.amountMinor, 0)
   const expense = active.filter((item) => item.type === 'expense').reduce((sum, item) => sum + item.amountMinor, 0)
@@ -73,7 +73,13 @@ export function HomePage() {
             <span /><span /><span />
           </div>
         ) : error ? (
-          <StateView icon={AlertCircle} title="Не вдалося завантажити операції" description="Перевірте з’єднання й спробуйте ще раз." />
+          <StateView
+            icon={AlertCircle}
+            title="Не вдалося завантажити операції"
+            description={error}
+            actionLabel="Спробувати ще раз"
+            onAction={() => void refreshTransactions().catch(() => undefined)}
+          />
         ) : active.length ? (
           <TransactionList transactions={active.slice(0, 4)} />
         ) : (

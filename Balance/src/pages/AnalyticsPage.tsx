@@ -35,7 +35,7 @@ function monthLabel(key: string) {
 export function AnalyticsPage() {
   const [activeTab, setActiveTab] = useState<AnalyticsTab>('Огляд')
   const [period, setPeriod] = useState(() => monthKey(new Date()))
-  const { transactions, loading, error } = useTransactions()
+  const { transactions, loading, error, refreshTransactions } = useTransactions()
 
   const monthOptions = useMemo(() => {
     const values = new Set<string>([period, monthKey(new Date())])
@@ -139,7 +139,15 @@ export function AnalyticsPage() {
       {loading ? (
         <div className="analytics-loading" role="status" aria-label="Завантаження аналітики"><span /><span /><span /></div>
       ) : error ? (
-        <div className="analytics-state"><StateView icon={AlertCircle} title="Аналітика недоступна" description="Не вдалося отримати операції цього простору." /></div>
+        <div className="analytics-state">
+          <StateView
+            icon={AlertCircle}
+            title="Аналітика недоступна"
+            description={error}
+            actionLabel="Спробувати ще раз"
+            onAction={() => void refreshTransactions().catch(() => undefined)}
+          />
+        </div>
       ) : (
         <>
           <section className="analytics-overview" aria-labelledby="analytics-total">

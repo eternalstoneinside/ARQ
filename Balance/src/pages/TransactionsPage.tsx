@@ -30,7 +30,7 @@ function groupLabel(date: string) {
 export function TransactionsPage() {
   const [filter, setFilter] = useState<Filter>('all')
   const [query, setQuery] = useState('')
-  const { transactions, loading, error } = useTransactions()
+  const { transactions, loading, error, refreshTransactions } = useTransactions()
 
   const filtered = useMemo(() => transactions
     .filter((item) => !item.deletedAt)
@@ -81,7 +81,15 @@ export function TransactionsPage() {
           <span /><span /><span /><span />
         </div>
       ) : error ? (
-        <div className="transaction-page-state"><StateView icon={AlertCircle} title="Операції недоступні" description="Не вдалося отримати дані цього простору." /></div>
+        <div className="transaction-page-state">
+          <StateView
+            icon={AlertCircle}
+            title="Операції недоступні"
+            description={error}
+            actionLabel="Спробувати ще раз"
+            onAction={() => void refreshTransactions().catch(() => undefined)}
+          />
+        </div>
       ) : filtered.length ? (
         <div className="transaction-groups">
           {Object.entries(groups).map(([label, items]) => (
