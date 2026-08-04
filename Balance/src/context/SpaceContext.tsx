@@ -98,7 +98,9 @@ export function SpaceProvider({ children }: { children: ReactNode }) {
   }, [refreshSpaces])
 
   const activeSpace = spaces.find((space) => space.id === activeSpaceId) ?? spaces[0] ?? null
-  const latestInviteCode = latestInvite?.spaceId === activeSpace?.id ? latestInvite.code : null
+  const latestInviteCode = latestInvite && activeSpace && latestInvite.spaceId === activeSpace.id
+    ? latestInvite.code
+    : null
 
   const value = useMemo(() => ({
     activeSpace,
