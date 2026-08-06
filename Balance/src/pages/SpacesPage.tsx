@@ -1,7 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowLeft, MoreHorizontal, Plus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { SpaceManagementSheet } from '../components/SpaceManagementSheet'
 import { useSpaces, type Space } from '../context/space-context'
 import {
@@ -16,6 +16,7 @@ type SheetState = { mode: 'create'; space: null } | { mode: 'manage'; space: Spa
 
 export function SpacesPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const reduceMotion = useReducedMotion()
   const { activeSpace, spaces } = useSpaces()
   const [sheet, setSheet] = useState<SheetState | null>(null)
@@ -24,6 +25,13 @@ export function SpacesPage() {
   const pageMotion = reduceMotion ? reducedPageVariants : pageVariants
   const rowMotion = reduceMotion ? reducedCardVariants : cardVariants
   const ownedCount = spaces.filter((space) => space.role === 'owner').length
+  const handleBack = () => {
+    if (location.state?.fromSettings) {
+      navigate(-1)
+      return
+    }
+    navigate('/app/settings', { replace: true })
+  }
 
   useEffect(() => () => {
     if (noticeTimer.current !== null) window.clearTimeout(noticeTimer.current)
@@ -38,13 +46,13 @@ export function SpacesPage() {
   return (
     <motion.article className="subpage spaces-page" variants={pageMotion} initial="hidden" animate="visible">
       <header className="simple-header simple-header--centered">
-        <button className="icon-button interactive" type="button" onClick={() => navigate('/app/settings')} aria-label="Назад"><ArrowLeft size={18} /></button>
+        <button className="icon-button interactive" type="button" onClick={handleBack} aria-label="Назад"><ArrowLeft size={18} /></button>
         <h1>Простори</h1>
         <button className="icon-button spaces-page__create interactive" type="button" onClick={() => setSheet({ mode: 'create', space: null })} aria-label="Створити простір"><Plus size={18} /></button>
       </header>
 
       <motion.section className="spaces-page__intro" variants={rowMotion}>
-        <span>ARQ Balance</span>
+        <span>Керування</span>
         <h2>Ваші простори.</h2>
         <p>Створюйте окремий простір для дому, подорожі або спільного проєкту.</p>
       </motion.section>

@@ -1,7 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowLeft, Check, Copy, KeyRound, LogOut, MoreHorizontal, RefreshCw, ShieldCheck, UserPlus, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { MemberManagementSheet } from '../components/MemberManagementSheet'
 import { useAuth } from '../context/auth-context'
 import { useSpaces } from '../context/space-context'
@@ -30,6 +30,7 @@ function initials(name: string) {
 
 export function MembersPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const reduceMotion = useReducedMotion()
   const { user } = useAuth()
   const { activeSpace, createInvite, latestInviteCode, revokeInvite } = useSpaces()
@@ -45,6 +46,13 @@ export function MembersPage() {
   const pageMotion = reduceMotion ? reducedPageVariants : pageVariants
   const rowMotion = reduceMotion ? reducedCardVariants : cardVariants
   const isOwner = activeSpace?.role === 'owner'
+  const handleBack = () => {
+    if (location.state?.fromSettings) {
+      navigate(-1)
+      return
+    }
+    navigate('/app/settings', { replace: true })
+  }
 
   const loadData = useCallback(async () => {
     if (!activeSpace) {
@@ -129,7 +137,7 @@ export function MembersPage() {
     return (
       <article className="subpage members-page">
         <header className="simple-header simple-header--centered">
-          <button className="icon-button interactive" type="button" onClick={() => navigate('/app')} aria-label="Назад"><ArrowLeft size={18} /></button>
+          <button className="icon-button interactive" type="button" onClick={handleBack} aria-label="Назад"><ArrowLeft size={18} /></button>
           <h1>Учасники</h1>
           <span />
         </header>
@@ -143,7 +151,7 @@ export function MembersPage() {
   return (
     <motion.article className="subpage members-page" variants={pageMotion} initial="hidden" animate="visible">
       <header className="simple-header simple-header--centered">
-        <button className="icon-button interactive" type="button" onClick={() => navigate('/app')} aria-label="Назад"><ArrowLeft size={18} /></button>
+        <button className="icon-button interactive" type="button" onClick={handleBack} aria-label="Назад"><ArrowLeft size={18} /></button>
         <h1>Спільний простір</h1>
         <span />
       </header>

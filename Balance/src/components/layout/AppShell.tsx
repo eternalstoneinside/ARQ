@@ -1,4 +1,4 @@
-import { ChartNoAxesColumn, Home, Plus, Settings, UsersRound } from 'lucide-react'
+import { ChartNoAxesColumn, Home, Plus, Settings } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { lazy, Suspense, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
@@ -12,7 +12,6 @@ const AddTransactionSheet = lazy(() => loadAddTransactionSheet()
 const nav = [
   { to: '/app', label: 'Головна', icon: Home },
   { to: '/app/analytics', label: 'Аналітика', icon: ChartNoAxesColumn },
-  { to: '/app/members', label: 'Учасники', icon: UsersRound },
   { to: '/app/settings', label: 'Налаштування', icon: Settings },
 ]
 
