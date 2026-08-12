@@ -16,7 +16,7 @@ A modal bottom sheet contains: type (`Витрата` / `Дохід`), amount, c
 
 ## Analytics and settings
 
-Analytics presents a period selector, three summaries, restrained category bars, five largest expenses, and later an optional person filter. Settings is a clear placeholder with feedback explaining unavailable account-backed actions.
+Analytics presents a period selector, three summaries, restrained category bars, and category breakdowns. Settings exposes only working profile/session and shared-space management actions; static product facts must not look interactive.
 
 ## Accessibility and states
 

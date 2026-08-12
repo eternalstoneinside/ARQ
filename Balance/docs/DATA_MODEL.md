@@ -8,7 +8,7 @@ Database fields: `id`, `couple_space_id`, `type`, `amount_minor`, `currency`, `c
 
 ## Permissions
 
-Supabase RLS must allow couple-space members to read active shared transactions. Only `created_by` may update or soft-delete their transaction in MVP. Delete operations set `deleted_at` and `deleted_by`; they do not remove rows.
+Supabase RLS allows space members to read active shared transactions. The author or space owner may update or soft-delete an active transaction. Delete operations set `deleted_at` and `deleted_by`; they do not remove rows.
 
 ## Supporting entities
 

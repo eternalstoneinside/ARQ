@@ -7,13 +7,13 @@ import { StateView } from '../components/ui/StateView'
 import { useTransactions } from '../context/transactions-context'
 import { useFinancialPrivacy } from '../context/privacy-context'
 import { formatMoney } from '../lib/format'
+import { getActiveTransactions, summarizeTransactions } from '../lib/transactions'
 
 export function HomePage() {
   const { moneyVisible, toggleMoneyVisibility } = useFinancialPrivacy()
   const { transactions, loading, error, refreshTransactions } = useTransactions()
-  const active = transactions.filter((item) => !item.deletedAt)
-  const income = active.filter((item) => item.type === 'income').reduce((sum, item) => sum + item.amountMinor, 0)
-  const expense = active.filter((item) => item.type === 'expense').reduce((sum, item) => sum + item.amountMinor, 0)
+  const active = getActiveTransactions(transactions)
+  const { income, expense } = summarizeTransactions(transactions)
 
   return (
     <div className="home-entry">

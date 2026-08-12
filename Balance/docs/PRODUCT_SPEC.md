@@ -21,7 +21,7 @@ Analytics stays simple: income, expenses, balance change for a selected period, 
 
 ## Transactions
 
-Types are `income` and `expense`. The user enters an unsigned amount; type defines its effect. Every transaction records a person for history, filtering, and analytics only—not debt or ownership. Authors may edit/soft-delete their transactions; partners may view but not edit/delete them in MVP.
+Types are `income` and `expense`. The user enters an unsigned amount; type defines its effect. Every transaction records a person for history, filtering, and analytics only—not debt or ownership. Authors and space owners may edit or soft-delete active transactions; other members may view them.
 
 Default expense categories: Продукти, Житло, Транспорт, Заклади, Покупки, Розваги, Здоров’я, Тварини, Інше. Default income categories: Зарплата, Підробіток, Подарунок, Інвестиції, Інше.
 
@@ -31,7 +31,7 @@ History search: category, comment, person, amount. Filters: all, income, expense
 
 ## Authentication and onboarding
 
-Methods: Google, Apple, email; no anonymous mode. After authentication: choose mode; `Пара` is available while Family, Shared, and Solo are coming soon; create or join a couple space through an invite link (never a code); name it; default currency to PLN; open empty Home; prompt for the first transaction; allow a shareable partner invite.
+Google is the beta authentication method; there is no anonymous mode. After authentication, a user creates a space or joins an existing one using a time-limited invitation code. New spaces default to PLN. A member may belong to multiple spaces and choose one active space. Apple sign-in may be added later.
 
 ## Notifications
 

@@ -5,9 +5,8 @@ import { TransactionList } from '../components/transactions/TransactionList'
 import { StateView } from '../components/ui/StateView'
 import { useTransactions } from '../context/transactions-context'
 import { categories } from '../data/mock'
-import type { Transaction, TransactionType } from '../domain/types'
-
-type Filter = 'all' | TransactionType
+import type { Transaction } from '../domain/types'
+import { filterTransactions, type TransactionFilter } from '../lib/transactions'
 
 const groupDateFormatter = new Intl.DateTimeFormat('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' })
 
@@ -28,21 +27,14 @@ function groupLabel(date: string) {
 }
 
 export function TransactionsPage() {
-  const [filter, setFilter] = useState<Filter>('all')
+  const [filter, setFilter] = useState<TransactionFilter>('all')
   const [query, setQuery] = useState('')
   const { transactions, loading, error, refreshTransactions } = useTransactions()
 
-  const filtered = useMemo(() => transactions
-    .filter((item) => !item.deletedAt)
-    .filter((item) => filter === 'all' || item.type === filter)
-    .filter((item) => {
-      const category = categories.find((categoryItem) => categoryItem.id === item.categoryId)
-      return `${category?.name ?? ''} ${item.personName} ${item.comment ?? ''}`
-        .toLocaleLowerCase('uk')
-        .includes(query.toLocaleLowerCase('uk').trim())
-    })
-    .sort((first, second) => second.transactionDate.localeCompare(first.transactionDate)
-      || second.createdAt.localeCompare(first.createdAt)), [filter, query, transactions])
+  const filtered = useMemo(
+    () => filterTransactions(transactions, filter, query, categories),
+    [filter, query, transactions],
+  )
 
   const groups = filtered.reduce<Record<string, Transaction[]>>((result, transaction) => {
     const label = groupLabel(transaction.transactionDate)
@@ -69,7 +61,7 @@ export function TransactionsPage() {
             className={filter === value ? 'is-active' : ''}
             key={value}
             type="button"
-            onClick={() => setFilter(value as Filter)}
+            onClick={() => setFilter(value as TransactionFilter)}
           >
             {label}
           </button>

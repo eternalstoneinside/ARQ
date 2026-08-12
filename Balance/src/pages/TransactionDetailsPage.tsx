@@ -10,6 +10,7 @@ import { useTransactions } from '../context/transactions-context'
 import { useFinancialPrivacy } from '../context/privacy-context'
 import { categories } from '../data/mock'
 import { formatDate, formatMoneyParts } from '../lib/format'
+import { canManageTransaction } from '../lib/transactions'
 
 const timeFormatter = new Intl.DateTimeFormat('uk-UA', { hour: '2-digit', minute: '2-digit' })
 
@@ -35,7 +36,7 @@ export function TransactionDetailsPage() {
 
   const category = categories.find((item) => item.id === transaction.categoryId)
   const amount = formatMoneyParts(transaction.amountMinor)
-  const canManage = transaction.createdBy === user?.id || activeSpace?.role === 'owner'
+  const canManage = canManageTransaction(transaction, user?.id, activeSpace?.role)
 
   return (
     <article className="detail-page">

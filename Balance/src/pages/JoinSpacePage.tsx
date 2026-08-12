@@ -3,6 +3,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { MotionWordmark } from '../components/motion/MotionWordmark'
 import { useSpaces } from '../context/space-context'
+import { normalizeInviteCode } from '../lib/invitations'
 import {
   buttonVariants,
   cardVariants,
@@ -26,9 +27,7 @@ export function JoinSpacePage() {
   const cardMotion = reduceMotion ? reducedCardVariants : cardVariants
   const buttonMotion = reduceMotion ? reducedButtonVariants : buttonVariants
 
-  const handleCodeChange = (value: string) => {
-    setInviteCode(value.toUpperCase().replace(/[^A-ZА-ЯІЇЄҐ0-9-]/g, ''))
-  }
+  const handleCodeChange = (value: string) => setInviteCode(normalizeInviteCode(value))
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -73,7 +72,7 @@ export function JoinSpacePage() {
               autoComplete="one-time-code"
               autoCapitalize="characters"
               enterKeyHint="done"
-              maxLength={17}
+              maxLength={18}
               spellCheck={false}
             />
             <small>Введіть код без пробілів.</small>
