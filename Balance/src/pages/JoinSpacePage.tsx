@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from 'framer-motion'
+import { X } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { MotionWordmark } from '../components/motion/MotionWordmark'
@@ -62,19 +63,38 @@ export function JoinSpacePage() {
 
           <div className="space-name-field invite-code-field">
             <label htmlFor="invite-code">Код запрошення</label>
-            <input
-              id="invite-code"
-              name="invite-code"
-              type="text"
-              value={inviteCode}
-              onChange={(event) => handleCodeChange(event.target.value)}
-              placeholder="ARQ-0000-0000-0000"
-              autoComplete="one-time-code"
-              autoCapitalize="characters"
-              enterKeyHint="done"
-              maxLength={18}
-              spellCheck={false}
-            />
+            <div className="invite-code-input">
+              <input
+                id="invite-code"
+                name="invite-code"
+                type="text"
+                value={inviteCode}
+                onChange={(event) => {
+                  handleCodeChange(event.target.value)
+                  if (error) setError(null)
+                }}
+                placeholder="ARQ-0000-0000-0000"
+                autoComplete="one-time-code"
+                autoCapitalize="characters"
+                enterKeyHint="done"
+                maxLength={18}
+                spellCheck={false}
+              />
+              {inviteCode && (
+                <button
+                  className="invite-code-clear interactive"
+                  type="button"
+                  onClick={() => {
+                    setInviteCode('')
+                    setError(null)
+                    document.getElementById('invite-code')?.focus()
+                  }}
+                  aria-label="Очистити код запрошення"
+                >
+                  <X size={17} strokeWidth={1.5} aria-hidden="true" />
+                </button>
+              )}
+            </div>
             <small>Введіть код без пробілів.</small>
             {error && <small className="field-error" role="alert">{error}</small>}
           </div>
