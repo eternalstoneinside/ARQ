@@ -8,10 +8,23 @@ Inspect repository, preserve useful work, choose foundation, and document the pl
 
 React/Vite/Tailwind foundation; strict TypeScript; routes and mobile shell; design tokens; shared primitives; Ukrainian copy foundation; centralized PLN/date utilities; domain types; realistic mock data; interactive Home/Add/Analytics; Settings placeholder; responsive light UI and dark token foundation; durable documentation.
 
-## Recommended next phase
+## ARQ Balance beta foundation — current
 
-After foundation review, design and implement the Supabase schema, migrations, indexes, seed categories, RLS policies, and generated database types. Validate author-only mutation and soft deletion before authentication UI is connected.
+- Google authentication and guarded routes;
+- complete space and invitation-code lifecycle;
+- persistent transaction CRUD with soft deletion and realtime refresh;
+- derived Home, history, details, and Analytics;
+- consistent mobile privacy, navigation, motion, and Safari behavior;
+- automated local tests and a two-account release checklist;
+- one production truth in `main`, deployed to GitHub Pages.
 
-## Later
+## Next after stabilization
 
-Authentication and onboarding; invite-link lifecycle; persistent transaction CRUD; searchable/filterable history; server-side recurrence; notifications; PWA hardening and native packaging assessment. Explicit MVP exclusions remain out of scope.
+1. Complete the two-real-account checklist and fix reproducible defects.
+2. Improve loading, offline, and retry states based on real usage.
+3. Add guarded error monitoring before expanding the feature surface.
+4. Finish PWA installation and standalone-mode polish.
+
+## Later product work
+
+Recurring salary, rent, and subscriptions are next. They require an idempotent server-side scheduler, execution history, timezone rules, and duplicate protection before UI ships.

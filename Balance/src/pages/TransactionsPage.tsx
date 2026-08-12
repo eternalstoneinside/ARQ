@@ -1,32 +1,40 @@
-import { Search } from 'lucide-react'
+import { AlertCircle, Inbox, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { AppHeader } from '../components/layout/AppHeader'
 import { TransactionList } from '../components/transactions/TransactionList'
+import { StateView } from '../components/ui/StateView'
 import { useTransactions } from '../context/transactions-context'
 import { categories } from '../data/mock'
-import type { Transaction, TransactionType } from '../domain/types'
+import type { Transaction } from '../domain/types'
+import { filterTransactions, type TransactionFilter } from '../lib/transactions'
 
-type Filter = 'all' | TransactionType
+const groupDateFormatter = new Intl.DateTimeFormat('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' })
+
+function localDateKey(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 function groupLabel(date: string) {
-  if (date === '2026-07-27') return 'Сьогодні'
-  if (date === '2026-07-26') return 'Учора'
-  return 'Раніше'
+  const today = new Date()
+  const yesterday = new Date(today)
+  yesterday.setDate(today.getDate() - 1)
+  if (date === localDateKey(today)) return 'Сьогодні'
+  if (date === localDateKey(yesterday)) return 'Учора'
+  return groupDateFormatter.format(new Date(`${date}T12:00:00`))
 }
 
 export function TransactionsPage() {
-  const [filter, setFilter] = useState<Filter>('all')
+  const [filter, setFilter] = useState<TransactionFilter>('all')
   const [query, setQuery] = useState('')
-  const { transactions } = useTransactions()
+  const { transactions, loading, error, refreshTransactions } = useTransactions()
 
-  const filtered = useMemo(() => transactions
-    .filter((item) => !item.deletedAt)
-    .filter((item) => filter === 'all' || item.type === filter)
-    .filter((item) => {
-      const category = categories.find((categoryItem) => categoryItem.id === item.categoryId)
-      return `${category?.name ?? ''} ${item.comment ?? ''}`.toLocaleLowerCase('uk').includes(query.toLocaleLowerCase('uk').trim())
-    })
-    .sort((a, b) => b.transactionDate.localeCompare(a.transactionDate)), [filter, query, transactions])
+  const filtered = useMemo(
+    () => filterTransactions(transactions, filter, query, categories),
+    [filter, query, transactions],
+  )
 
   const groups = filtered.reduce<Record<string, Transaction[]>>((result, transaction) => {
     const label = groupLabel(transaction.transactionDate)
@@ -53,14 +61,28 @@ export function TransactionsPage() {
             className={filter === value ? 'is-active' : ''}
             key={value}
             type="button"
-            onClick={() => setFilter(value as Filter)}
+            onClick={() => setFilter(value as TransactionFilter)}
           >
             {label}
           </button>
         ))}
       </div>
 
-      {filtered.length ? (
+      {loading ? (
+        <div className="transaction-page-loading" role="status" aria-label="Завантаження операцій">
+          <span /><span /><span /><span />
+        </div>
+      ) : error ? (
+        <div className="transaction-page-state">
+          <StateView
+            icon={AlertCircle}
+            title="Операції недоступні"
+            description={error}
+            actionLabel="Спробувати ще раз"
+            onAction={() => void refreshTransactions().catch(() => undefined)}
+          />
+        </div>
+      ) : filtered.length ? (
         <div className="transaction-groups">
           {Object.entries(groups).map(([label, items]) => (
             <section key={label}>
@@ -70,10 +92,12 @@ export function TransactionsPage() {
           ))}
         </div>
       ) : (
-        <div className="inline-empty">
-          <span aria-hidden="true">⌁</span>
-          <h1>Нічого не знайдено</h1>
-          <p>Спробуйте змінити запит або фільтр.</p>
+        <div className="transaction-page-state">
+          <StateView
+            icon={Inbox}
+            title={transactions.length ? 'Нічого не знайдено' : 'Поки що немає операцій'}
+            description={transactions.length ? 'Спробуйте змінити запит або фільтр.' : 'Додайте першу операцію — вона з’явиться тут.'}
+          />
         </div>
       )}
     </>

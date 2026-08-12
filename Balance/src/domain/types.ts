@@ -17,20 +17,29 @@ export interface Category {
 
 export interface Transaction {
   id: string
-  coupleSpaceId: string
+  spaceId: string
   type: TransactionType
   amountMinor: number
   currency: Currency
   categoryId: string
   personId: string
+  personName: string
   transactionDate: string
   comment: string | null
-  recurrenceId: string | null
   createdBy: string
   createdAt: string
   updatedAt: string
   deletedAt: string | null
   deletedBy: string | null
+}
+
+export interface TransactionInput {
+  type: TransactionType
+  amountMinor: number
+  categoryId: string
+  personId: string
+  transactionDate: string
+  comment: string | null
 }
 
 export interface Recurrence {
