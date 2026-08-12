@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { Check, SlidersHorizontal } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router'
@@ -88,9 +88,8 @@ export function SpaceSwitcherSheet({ open, onClose }: { open: boolean; onClose: 
           >
             <span className="sheet-handle" aria-hidden="true" />
             <div className="space-switch-sheet__heading">
-              <span>Активний простір</span>
-              <h2 id="space-switch-title">Оберіть простір.</h2>
-              <p>Баланс, учасники й операції належать до обраного простору.</p>
+              <h2 id="space-switch-title">Ваші простори</h2>
+              <p>Оберіть простір, з яким хочете працювати.</p>
             </div>
 
             <div className="space-switch-list" role="listbox" aria-label="Доступні простори">
@@ -108,10 +107,9 @@ export function SpaceSwitcherSheet({ open, onClose }: { open: boolean; onClose: 
                     ref={index === 0 ? firstOptionRef : undefined}
                     onClick={() => void handleSelect(space.id)}
                   >
-                    <span className="space-switch-list__index">{String(index + 1).padStart(2, '0')}</span>
                     <span className="space-switch-list__copy">
                       <strong>{space.name}</strong>
-                      <small>{switching ? 'Змінюємо…' : space.role === 'owner' ? 'Власник' : 'Учасник'}</small>
+                      <small>{switching ? 'Змінюємо…' : selected ? 'Активний' : space.role === 'owner' ? 'Власник' : 'Учасник'}</small>
                     </span>
                     <span className="space-switch-list__status" aria-hidden="true">{selected && <Check size={17} strokeWidth={1.7} />}</span>
                   </button>
@@ -129,7 +127,6 @@ export function SpaceSwitcherSheet({ open, onClose }: { open: boolean; onClose: 
                 navigate('/app/settings/spaces')
               }}
             >
-              <SlidersHorizontal size={16} strokeWidth={1.55} />
               Керувати просторами
             </button>
           </motion.section>

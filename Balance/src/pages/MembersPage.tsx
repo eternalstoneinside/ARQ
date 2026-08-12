@@ -9,9 +9,7 @@ import { fetchLatestInvite, fetchSpaceMembers, type SpaceInviteStatus, type Spac
 import {
   cardVariants,
   listVariants,
-  pageVariants,
   reducedCardVariants,
-  reducedPageVariants,
 } from '../motion/motionTokens'
 
 type SheetState = { mode: 'leave'; member: null } | { mode: 'member'; member: SpaceMember }
@@ -43,7 +41,6 @@ export function MembersPage() {
   const [sheet, setSheet] = useState<SheetState | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const noticeTimer = useRef<number | null>(null)
-  const pageMotion = reduceMotion ? reducedPageVariants : pageVariants
   const rowMotion = reduceMotion ? reducedCardVariants : cardVariants
   const isOwner = activeSpace?.role === 'owner'
   const handleBack = () => {
@@ -136,8 +133,8 @@ export function MembersPage() {
   if (!activeSpace) {
     return (
       <article className="subpage members-page">
-        <header className="simple-header simple-header--centered">
-          <button className="icon-button interactive" type="button" onClick={handleBack} aria-label="Назад"><ArrowLeft size={18} /></button>
+        <header className="simple-header simple-header--centered subpage-header">
+          <button className="icon-button interactive" type="button" onClick={handleBack} aria-label="Назад"><ArrowLeft size={19} strokeWidth={1.55} /></button>
           <h1>Учасники</h1>
           <span />
         </header>
@@ -149,10 +146,10 @@ export function MembersPage() {
   const inviteStatus = invite?.active ? 'Активне' : invite?.revokedAt ? 'Відкликане' : invite ? 'Завершене' : 'Не створено'
 
   return (
-    <motion.article className="subpage members-page" variants={pageMotion} initial="hidden" animate="visible">
-      <header className="simple-header simple-header--centered">
-        <button className="icon-button interactive" type="button" onClick={handleBack} aria-label="Назад"><ArrowLeft size={18} /></button>
-        <h1>Спільний простір</h1>
+    <article className="subpage members-page">
+      <header className="simple-header simple-header--centered subpage-header">
+        <button className="icon-button interactive" type="button" onClick={handleBack} aria-label="Назад"><ArrowLeft size={19} strokeWidth={1.55} /></button>
+        <h1>Учасники</h1>
         <span />
       </header>
 
@@ -278,6 +275,6 @@ export function MembersPage() {
           void loadData()
         }}
       />
-    </motion.article>
+    </article>
   )
 }

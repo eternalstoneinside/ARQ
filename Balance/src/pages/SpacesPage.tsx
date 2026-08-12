@@ -7,9 +7,7 @@ import { useSpaces, type Space } from '../context/space-context'
 import {
   cardVariants,
   listVariants,
-  pageVariants,
   reducedCardVariants,
-  reducedPageVariants,
 } from '../motion/motionTokens'
 
 type SheetState = { mode: 'create'; space: null } | { mode: 'manage'; space: Space }
@@ -22,7 +20,6 @@ export function SpacesPage() {
   const [sheet, setSheet] = useState<SheetState | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const noticeTimer = useRef<number | null>(null)
-  const pageMotion = reduceMotion ? reducedPageVariants : pageVariants
   const rowMotion = reduceMotion ? reducedCardVariants : cardVariants
   const ownedCount = spaces.filter((space) => space.role === 'owner').length
   const handleBack = () => {
@@ -44,17 +41,16 @@ export function SpacesPage() {
   }
 
   return (
-    <motion.article className="subpage spaces-page" variants={pageMotion} initial="hidden" animate="visible">
-      <header className="simple-header simple-header--centered">
-        <button className="icon-button interactive" type="button" onClick={handleBack} aria-label="Назад"><ArrowLeft size={18} /></button>
+    <article className="subpage spaces-page">
+      <header className="simple-header simple-header--centered subpage-header">
+        <button className="icon-button interactive" type="button" onClick={handleBack} aria-label="Назад"><ArrowLeft size={19} strokeWidth={1.55} /></button>
         <h1>Простори</h1>
-        <button className="icon-button spaces-page__create interactive" type="button" onClick={() => setSheet({ mode: 'create', space: null })} aria-label="Створити простір"><Plus size={18} /></button>
+        <button className="icon-button spaces-page__create interactive" type="button" onClick={() => setSheet({ mode: 'create', space: null })} aria-label="Створити простір"><Plus size={18} strokeWidth={1.55} /></button>
       </header>
 
       <motion.section className="spaces-page__intro" variants={rowMotion}>
-        <span>Керування</span>
-        <h2>Ваші простори.</h2>
-        <p>Створюйте окремий простір для дому, подорожі або спільного проєкту.</p>
+        <h2>Ваші простори</h2>
+        <p>Кожен простір має власний баланс, учасників і операції.</p>
       </motion.section>
 
       <motion.section className="spaces-page__collection" variants={rowMotion} aria-labelledby="spaces-list-title">
@@ -67,9 +63,8 @@ export function SpacesPage() {
         </header>
 
         <motion.div className="spaces-list" role="list" variants={listVariants} initial="hidden" animate="visible">
-          {spaces.map((space, index) => (
+          {spaces.map((space) => (
             <motion.div className={`spaces-list__row ${space.id === activeSpace?.id ? 'is-active' : ''}`} role="listitem" key={space.id} variants={rowMotion}>
-              <span className="spaces-list__index">{String(index + 1).padStart(2, '0')}</span>
               <span className="spaces-list__copy">
                 <strong>{space.name}</strong>
                 <small>
@@ -86,11 +81,6 @@ export function SpacesPage() {
           ))}
         </motion.div>
       </motion.section>
-
-      <motion.button className="spaces-page__new interactive" type="button" variants={rowMotion} onClick={() => setSheet({ mode: 'create', space: null })}>
-        <Plus size={17} strokeWidth={1.6} />
-        <span><strong>Створити простір</strong><small>Почати новий спільний баланс</small></span>
-      </motion.button>
 
       <div className={`spaces-page__notice ${notice ? 'is-visible' : ''}`} role="status" aria-live="polite">{notice ?? ''}</div>
 
@@ -109,6 +99,6 @@ export function SpacesPage() {
           announce(`Простір «${space.name}» видалено.`)
         }}
       />
-    </motion.article>
+    </article>
   )
 }

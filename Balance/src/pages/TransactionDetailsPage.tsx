@@ -7,6 +7,7 @@ import { CategoryIcon } from '../components/ui/CategoryIcon'
 import { useAuth } from '../context/auth-context'
 import { useSpaces } from '../context/space-context'
 import { useTransactions } from '../context/transactions-context'
+import { useFinancialPrivacy } from '../context/privacy-context'
 import { categories } from '../data/mock'
 import { formatDate, formatMoneyParts } from '../lib/format'
 
@@ -18,6 +19,7 @@ export function TransactionDetailsPage() {
   const { user } = useAuth()
   const { activeSpace } = useSpaces()
   const { transactions, loading } = useTransactions()
+  const { moneyVisible } = useFinancialPrivacy()
   const [actionsOpen, setActionsOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const transaction = transactions.find((item) => item.id === transactionId && !item.deletedAt)
@@ -47,8 +49,8 @@ export function TransactionDetailsPage() {
       <section className="detail-hero">
         <div className="detail-icon"><CategoryIcon icon={category?.icon} type={transaction.type} /></div>
         <h1>{category?.name ?? 'Операція'}</h1>
-        <p className={transaction.type === 'income' ? 'positive' : 'negative'}>
-          {transaction.type === 'income' ? '+' : '−'}{amount.number} <small>{amount.currency}</small>
+        <p className={`${transaction.type === 'income' ? 'positive' : 'negative'} ${moneyVisible ? '' : 'money-mask'}`}>
+          {moneyVisible ? <>{transaction.type === 'income' ? '+' : '−'}{amount.number} <small>{amount.currency}</small></> : '••••••'}
         </p>
         <span>{transaction.personName} · {formatDate(transaction.transactionDate)}</span>
       </section>

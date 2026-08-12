@@ -1,30 +1,22 @@
 import { AlertCircle, ArrowDownLeft, ArrowUpRight, Eye, EyeOff, Inbox } from 'lucide-react'
-import { motion, useReducedMotion } from 'framer-motion'
-import { useState } from 'react'
 import { Link } from 'react-router'
 import { AppHeader } from '../components/layout/AppHeader'
 import { CountUpBalance } from '../components/motion/CountUpBalance'
 import { TransactionList } from '../components/transactions/TransactionList'
 import { StateView } from '../components/ui/StateView'
 import { useTransactions } from '../context/transactions-context'
+import { useFinancialPrivacy } from '../context/privacy-context'
 import { formatMoney } from '../lib/format'
-import { productEntryVariants, reducedProductEntryVariants } from '../motion/motionTokens'
 
 export function HomePage() {
-  const [balanceVisible, setBalanceVisible] = useState(true)
-  const reduceMotion = useReducedMotion()
+  const { moneyVisible, toggleMoneyVisibility } = useFinancialPrivacy()
   const { transactions, loading, error, refreshTransactions } = useTransactions()
   const active = transactions.filter((item) => !item.deletedAt)
   const income = active.filter((item) => item.type === 'income').reduce((sum, item) => sum + item.amountMinor, 0)
   const expense = active.filter((item) => item.type === 'expense').reduce((sum, item) => sum + item.amountMinor, 0)
 
   return (
-    <motion.div
-      className="home-entry"
-      variants={reduceMotion ? reducedProductEntryVariants : productEntryVariants}
-      initial="hidden"
-      animate="visible"
-    >
+    <div className="home-entry">
       <AppHeader />
 
       <section className="balance-hero" aria-labelledby="balance-title">
@@ -33,17 +25,17 @@ export function HomePage() {
           <button
             className="icon-button interactive"
             type="button"
-            onClick={() => setBalanceVisible((visible) => !visible)}
-            aria-label={balanceVisible ? 'Приховати баланс' : 'Показати баланс'}
+            onClick={toggleMoneyVisibility}
+            aria-label={moneyVisible ? 'Приховати всі суми' : 'Показати всі суми'}
           >
-            {balanceVisible ? <Eye size={14} strokeWidth={1.6} /> : <EyeOff size={14} strokeWidth={1.6} />}
+            {moneyVisible ? <Eye size={14} strokeWidth={1.6} /> : <EyeOff size={14} strokeWidth={1.6} />}
           </button>
         </div>
 
-        <div className={`balance-value ${balanceVisible ? '' : 'is-hidden'}`} aria-live="polite">
-          {balanceVisible ? (
+        <div className={`balance-value ${moneyVisible ? '' : 'is-hidden'}`} aria-live="polite">
+          {moneyVisible ? (
             <CountUpBalance minor={income - expense} />
-          ) : <span className="balance-mask">••••••</span>}
+          ) : <span className="balance-mask" aria-label="Суму приховано">••••••</span>}
         </div>
         <p className="balance-caption">Усі активні доходи й витрати<br />у вашому просторі.</p>
       </section>
@@ -51,11 +43,11 @@ export function HomePage() {
       <section className="money-summary" aria-label="Підсумок доходів і витрат">
         <div>
           <span><ArrowDownLeft size={16} strokeWidth={1.45} />Доходи</span>
-          <strong className="positive">+{formatMoney(income)}</strong>
+          <strong className={`positive ${moneyVisible ? '' : 'money-mask'}`}>{moneyVisible ? `+${formatMoney(income)}` : '••••'}</strong>
         </div>
         <div>
           <span><ArrowUpRight size={16} strokeWidth={1.45} />Витрати</span>
-          <strong className="negative">−{formatMoney(expense)}</strong>
+          <strong className={`negative ${moneyVisible ? '' : 'money-mask'}`}>{moneyVisible ? `−${formatMoney(expense)}` : '••••'}</strong>
         </div>
       </section>
 
@@ -86,6 +78,6 @@ export function HomePage() {
           <StateView icon={Inbox} title="Поки що немає операцій" description="Додайте першу операцію, щоб побачити активність." />
         )}
       </section>
-    </motion.div>
+    </div>
   )
 }

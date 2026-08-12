@@ -4,6 +4,7 @@ import { AppHeader } from '../components/layout/AppHeader'
 import { CategoryIcon } from '../components/ui/CategoryIcon'
 import { StateView } from '../components/ui/StateView'
 import { useTransactions } from '../context/transactions-context'
+import { useFinancialPrivacy } from '../context/privacy-context'
 import { categories } from '../data/mock'
 import type { TransactionType } from '../domain/types'
 import { formatMoney, formatMoneyParts } from '../lib/format'
@@ -33,6 +34,7 @@ function monthLabel(key: string) {
 }
 
 export function AnalyticsPage() {
+  const { moneyVisible } = useFinancialPrivacy()
   const [activeTab, setActiveTab] = useState<AnalyticsTab>('Огляд')
   const [period, setPeriod] = useState(() => monthKey(new Date()))
   const { transactions, loading, error, refreshTransactions } = useTransactions()
@@ -152,8 +154,8 @@ export function AnalyticsPage() {
         <>
           <section className="analytics-overview" aria-labelledby="analytics-total">
             <p>{metricTitle}</p>
-            <h1 id="analytics-total" className={metricClass}>
-              {metricSign}{metricParts.number}<small>{metricParts.currency}</small>
+            <h1 id="analytics-total" className={`${metricClass} ${moneyVisible ? '' : 'money-mask'}`}>
+              {moneyVisible ? <>{metricSign}{metricParts.number}<small>{metricParts.currency}</small></> : '••••••'}
             </h1>
             <span>{comparison}</span>
 
@@ -188,7 +190,7 @@ export function AnalyticsPage() {
                         <small>{percentage}%</small>
                         <i><b style={{ width: `${percentage}%` }} /></i>
                       </span>
-                      <strong>{formatMoney(item.amount)}</strong>
+                      <strong className={moneyVisible ? '' : 'money-mask'}>{moneyVisible ? formatMoney(item.amount) : '••••'}</strong>
                     </li>
                   )
                 })}

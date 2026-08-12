@@ -129,3 +129,15 @@ export const reducedProductEntryVariants: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { duration: 0.16 } },
 }
+
+export const routeVariants: Variants = {
+  hidden: { opacity: 0, y: 5 },
+  visible: { opacity: 1, y: 0, transition: { type: 'spring', visualDuration: 0.24, bounce: 0 } },
+  exit: { opacity: 0, y: -3, transition: { duration: 0.14, ease: 'easeOut' } },
+}
+
+export const reducedRouteVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.12 } },
+  exit: { opacity: 0, transition: { duration: 0.08 } },
+}
