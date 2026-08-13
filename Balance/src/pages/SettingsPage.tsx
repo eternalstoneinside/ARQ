@@ -2,12 +2,14 @@ import {
   ArrowLeft,
   ChevronRight,
   Layers3,
+  Shapes,
   LogOut,
   ShieldCheck,
   UsersRound,
 } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { useState } from 'react'
+import { CategoryManagementSheet } from '../components/CategoryManagementSheet'
 import { useAuth } from '../context/auth-context'
 import { useSpaces } from '../context/space-context'
 
@@ -35,6 +37,7 @@ export function SettingsPage() {
   const { signOut, user } = useAuth()
   const { activeSpace, spaces } = useSpaces()
   const [signingOut, setSigningOut] = useState(false)
+  const [categoriesOpen, setCategoriesOpen] = useState(false)
   const displayName = String(user?.user_metadata.full_name ?? user?.user_metadata.name ?? 'Користувач ARQ')
   const initials = displayName.trim().slice(0, 1).toUpperCase() || 'A'
 
@@ -51,7 +54,7 @@ export function SettingsPage() {
   return (
     <article className="subpage settings-page">
       <header className="simple-header simple-header--centered subpage-header">
-        <button className="icon-button interactive" type="button" onClick={() => navigate('/app', { replace: true })} aria-label="Назад"><ArrowLeft size={19} strokeWidth={1.55} /></button>
+        <button className="icon-button interactive" type="button" onClick={() => navigate('/app')} aria-label="Назад"><ArrowLeft size={19} strokeWidth={1.55} /></button>
         <h1>Налаштування</h1>
         <span />
       </header>
@@ -86,6 +89,14 @@ export function SettingsPage() {
             </span>
             <ChevronRight size={15} strokeWidth={1.5} />
           </button>
+          <button className="interactive" type="button" onClick={() => setCategoriesOpen(true)}>
+            <Shapes size={18} strokeWidth={1.45} />
+            <span>
+              <strong>Категорії операцій</strong>
+              <small>Власні назви та види витрат</small>
+            </span>
+            <ChevronRight size={15} strokeWidth={1.5} />
+          </button>
         </div>
       </section>
 
@@ -100,6 +111,7 @@ export function SettingsPage() {
 
       <button className="danger-link interactive" type="button" disabled={signingOut} onClick={() => void handleSignOut()}><LogOut size={16} />{signingOut ? 'Виходимо…' : 'Вийти з акаунту'}</button>
       <span className="settings-security"><ShieldCheck size={13} />Дані простору захищені правилами доступу</span>
+      <CategoryManagementSheet open={categoriesOpen} onClose={() => setCategoriesOpen(false)} />
     </article>
   )
 }

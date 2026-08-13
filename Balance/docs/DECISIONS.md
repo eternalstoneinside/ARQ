@@ -16,6 +16,7 @@
 | Supabase is the production source of truth | Auth, spaces, invitations, memberships, active-space preference, and transactions persist behind RLS. |
 | Invite codes are hashed and time-limited | Stored values cannot be used directly; joining is serialized under a row lock. |
 | Automated tests never mutate production | Product rules and migration contracts run locally; multi-account behavior uses a controlled checklist. |
+| Categories are shared, mutable space entities | Personal names are useful, but analytics and collaboration require one vocabulary per space; archival preserves history. |
 | `main` is the production truth | The deployed product must map to reviewed code merged into `main`. |
 | Balance inherits the root ARQ Source of Truth | Product-specific visual decisions may extend but cannot override the master brand, design language, or product philosophy. |
 | Open composition makes balance primary | The product’s central number establishes hierarchy through typography and space, not a dashboard card. |

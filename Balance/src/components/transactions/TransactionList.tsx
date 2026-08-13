@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { Link } from 'react-router'
-import { categories } from '../../data/mock'
+import { useCategories } from '../../context/categories-context'
 import type { Transaction } from '../../domain/types'
 import { formatDate } from '../../lib/format'
 import { Amount } from '../ui/Amount'
@@ -15,6 +15,7 @@ export function TransactionList({
   linkToDetails?: boolean
 }) {
   const reduceMotion = useReducedMotion()
+  const { categories } = useCategories()
   const rowMotion = reduceMotion ? reducedCardVariants : cardVariants
 
   return (
@@ -25,7 +26,7 @@ export function TransactionList({
           <>
             <CategoryIcon icon={category?.icon} type={transaction.type} size="sm" />
             <span className="transaction-copy">
-              <strong>{category?.name}</strong>
+              <strong>{category?.name ?? 'Операція'}</strong>
               <small>{transaction.personName} · {formatDate(transaction.transactionDate)}</small>
             </span>
             <Amount minor={transaction.amountMinor} type={transaction.type} />

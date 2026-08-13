@@ -5,7 +5,7 @@ import { CategoryIcon } from '../components/ui/CategoryIcon'
 import { StateView } from '../components/ui/StateView'
 import { useTransactions } from '../context/transactions-context'
 import { useFinancialPrivacy } from '../context/privacy-context'
-import { categories } from '../data/mock'
+import { useCategories } from '../context/categories-context'
 import type { TransactionType } from '../domain/types'
 import { formatMoney, formatMoneyParts } from '../lib/format'
 
@@ -35,6 +35,7 @@ function monthLabel(key: string) {
 
 export function AnalyticsPage() {
   const { moneyVisible } = useFinancialPrivacy()
+  const { categories } = useCategories()
   const [activeTab, setActiveTab] = useState<AnalyticsTab>('Огляд')
   const [period, setPeriod] = useState(() => monthKey(new Date()))
   const { transactions, loading, error, refreshTransactions } = useTransactions()

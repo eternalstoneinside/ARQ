@@ -131,9 +131,9 @@ export const reducedProductEntryVariants: Variants = {
 }
 
 export const routeVariants: Variants = {
-  hidden: { opacity: 0, y: 5 },
-  visible: { opacity: 1, y: 0, transition: { type: 'spring', visualDuration: 0.24, bounce: 0 } },
-  exit: { opacity: 0, y: -3, transition: { duration: 0.14, ease: 'easeOut' } },
+  hidden: { opacity: 0, y: motionTokens.distance.page, filter: 'blur(2px)' },
+  visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: motionTokens.spring.screen },
+  exit: { opacity: 0, y: -6, filter: 'blur(1px)', transition: { duration: 0.18, ease: 'easeOut' } },
 }
 
 export const reducedRouteVariants: Variants = {

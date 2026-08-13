@@ -27,6 +27,12 @@ export type Database = {
         Update: { expires_at?: string; revoked_at?: string | null; used_count?: number }
         Relationships: [{ foreignKeyName: 'space_invites_space_id_fkey'; columns: ['space_id']; isOneToOne: false; referencedRelation: 'spaces'; referencedColumns: ['id'] }]
       }
+      space_categories: {
+        Row: { archived_at: string | null; created_at: string; created_by: string; icon: string; id: string; is_default: boolean; name: string; sort_order: number; space_id: string; type: string; updated_at: string }
+        Insert: { archived_at?: string | null; created_at?: string; created_by: string; icon?: string; id?: string; is_default?: boolean; name: string; sort_order?: number; space_id: string; type: string; updated_at?: string }
+        Update: { archived_at?: string | null; icon?: string; name?: string; sort_order?: number; updated_at?: string }
+        Relationships: [{ foreignKeyName: 'space_categories_space_id_fkey'; columns: ['space_id']; isOneToOne: false; referencedRelation: 'spaces'; referencedColumns: ['id'] }]
+      }
       transactions: {
         Row: { amount_minor: number; category_id: string; comment: string | null; created_at: string; created_by: string; currency: string; deleted_at: string | null; deleted_by: string | null; id: string; person_id: string; person_name: string; space_id: string; transaction_date: string; type: string; updated_at: string }
         Insert: { amount_minor: number; category_id: string; comment?: string | null; created_at?: string; created_by: string; currency?: string; deleted_at?: string | null; deleted_by?: string | null; id?: string; person_id: string; person_name: string; space_id: string; transaction_date?: string; type: string; updated_at?: string }

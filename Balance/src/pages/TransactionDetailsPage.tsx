@@ -8,7 +8,7 @@ import { useAuth } from '../context/auth-context'
 import { useSpaces } from '../context/space-context'
 import { useTransactions } from '../context/transactions-context'
 import { useFinancialPrivacy } from '../context/privacy-context'
-import { categories } from '../data/mock'
+import { useCategories } from '../context/categories-context'
 import { formatDate, formatMoneyParts } from '../lib/format'
 import { canManageTransaction } from '../lib/transactions'
 
@@ -21,6 +21,7 @@ export function TransactionDetailsPage() {
   const { activeSpace } = useSpaces()
   const { transactions, loading } = useTransactions()
   const { moneyVisible } = useFinancialPrivacy()
+  const { categories } = useCategories()
   const [actionsOpen, setActionsOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const transaction = transactions.find((item) => item.id === transactionId && !item.deletedAt)

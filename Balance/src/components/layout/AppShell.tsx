@@ -4,6 +4,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { TransactionsProvider } from '../../context/TransactionsContext'
 import { PrivacyProvider } from '../../context/PrivacyContext'
+import { CategoriesProvider } from '../../context/CategoriesContext'
 import {
   buttonVariants,
   reducedButtonVariants,
@@ -49,10 +50,11 @@ export function AppShell() {
 
   return (
     <PrivacyProvider>
-      <TransactionsProvider>
+      <CategoriesProvider>
+        <TransactionsProvider>
         <div className={`app-frame ${isHome ? 'app-frame--home' : ''}`}>
           <main className={`app-main ${fullScreen ? 'app-main--full' : ''}`}>
-            <AnimatePresence initial={false} mode="popLayout">
+            <AnimatePresence initial={false} mode="wait">
               <motion.div
                 className="route-layer"
                 key={location.pathname}
@@ -102,16 +104,15 @@ export function AppShell() {
             <Plus size={21} strokeWidth={1.65} aria-hidden="true" />
           </motion.button>}
         </div>
-        {sheetOpen && (
-          <Suspense fallback={(
+        <Suspense fallback={sheetOpen ? (
             <div className="sheet-backdrop" role="status" aria-label="Відкриваємо форму операції">
               <section className="transaction-sheet transaction-sheet--loading"><span /><span /><span /></section>
             </div>
-          )}>
-            <AddTransactionSheet open onClose={() => setSheetOpen(false)} />
-          </Suspense>
-        )}
-      </TransactionsProvider>
+          ) : null}>
+          <AddTransactionSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
+        </Suspense>
+        </TransactionsProvider>
+      </CategoriesProvider>
     </PrivacyProvider>
   )
 }

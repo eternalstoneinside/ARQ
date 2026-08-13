@@ -1,14 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CalendarDays, ChevronRight, CircleUserRound, LoaderCircle, Shapes, Text } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { useTransactions } from '../../context/transactions-context'
 import { useAuth } from '../../context/auth-context'
 import { useSpaces } from '../../context/space-context'
-import { categories } from '../../data/mock'
+import { useCategories } from '../../context/categories-context'
 import type { Transaction, TransactionType } from '../../domain/types'
 import { parseAmountToMinor } from '../../lib/format'
 import { fetchSpaceMembers, type SpaceMember } from '../../lib/spaceMembers'
@@ -40,6 +40,7 @@ function amountForInput(amountMinor: number) {
 
 export function AddTransactionSheet({ open, onClose, transaction = null }: AddTransactionSheetProps) {
   const { addTransaction, updateTransaction } = useTransactions()
+  const { categories } = useCategories()
   const { user } = useAuth()
   const { activeSpace } = useSpaces()
   const reduceMotion = useReducedMotion()
@@ -65,6 +66,12 @@ export function AddTransactionSheet({ open, onClose, transaction = null }: AddTr
     },
   })
   const type = watch('type')
+  const defaultCategoryId = useCallback((nextType: TransactionType) => {
+    const preferredId = nextType === 'expense' ? 'food' : 'salary'
+    return categories.find((category) => category.type === nextType && !category.archivedAt && category.id === preferredId)?.id
+      ?? categories.find((category) => category.type === nextType && !category.archivedAt)?.id
+      ?? ''
+  }, [categories])
 
   useEffect(() => {
     if (!open) return
@@ -101,7 +108,7 @@ export function AddTransactionSheet({ open, onClose, transaction = null }: AddTr
         reset({
           type: transaction?.type ?? 'expense',
           amount: transaction ? amountForInput(transaction.amountMinor) : '',
-          categoryId: transaction?.categoryId ?? 'food',
+          categoryId: transaction?.categoryId ?? defaultCategoryId('expense'),
           personId: transaction?.personId ?? preferred?.userId ?? '',
           date: transaction?.transactionDate ?? new Date().toISOString().slice(0, 10),
           comment: transaction?.comment ?? '',
@@ -116,7 +123,7 @@ export function AddTransactionSheet({ open, onClose, transaction = null }: AddTr
     return () => {
       cancelled = true
     }
-  }, [activeSpace, open, reset, transaction, user])
+  }, [activeSpace, defaultCategoryId, open, reset, transaction, user])
 
   const onSubmit = async (values: FormValues) => {
     const amountMinor = parseAmountToMinor(values.amount)
@@ -136,7 +143,7 @@ export function AddTransactionSheet({ open, onClose, transaction = null }: AddTr
       reset({
         type: 'expense',
         amount: '',
-        categoryId: 'food',
+        categoryId: defaultCategoryId('expense'),
         personId: user?.id ?? members[0]?.userId ?? '',
         date: new Date().toISOString().slice(0, 10),
         comment: '',
@@ -147,7 +154,9 @@ export function AddTransactionSheet({ open, onClose, transaction = null }: AddTr
     }
   }
 
-  const visibleCategories = categories.filter((category) => category.type === type)
+  const visibleCategories = categories.filter((category) => category.type === type && (
+    !category.archivedAt || (transaction?.categoryId === category.id && transaction.type === type)
+  ))
 
   return createPortal(
     <AnimatePresence>
@@ -185,7 +194,7 @@ export function AddTransactionSheet({ open, onClose, transaction = null }: AddTr
                     type="button"
                     onClick={() => {
                       setValue('type', value)
-                      setValue('categoryId', value === 'expense' ? 'food' : 'salary')
+                      setValue('categoryId', defaultCategoryId(value))
                     }}
                   >
                     {value === 'expense' ? 'Витрата' : 'Дохід'}
@@ -207,7 +216,7 @@ export function AddTransactionSheet({ open, onClose, transaction = null }: AddTr
                   <Shapes size={16} />
                   <strong>Категорія</strong>
                   <select {...register('categoryId')}>
-                    {visibleCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+                    {visibleCategories.map((category) => <option key={category.id} value={category.id}>{category.name}{category.archivedAt ? ' (архів)' : ''}</option>)}
                   </select>
                   <ChevronRight size={14} />
                 </label>

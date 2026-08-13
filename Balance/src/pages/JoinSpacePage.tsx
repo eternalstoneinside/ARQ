@@ -1,5 +1,5 @@
 import { motion, useReducedMotion } from 'framer-motion'
-import { X } from 'lucide-react'
+import { ClipboardPaste, X } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { MotionWordmark } from '../components/motion/MotionWordmark'
@@ -29,6 +29,17 @@ export function JoinSpacePage() {
   const buttonMotion = reduceMotion ? reducedButtonVariants : buttonVariants
 
   const handleCodeChange = (value: string) => setInviteCode(normalizeInviteCode(value))
+
+  const handlePaste = async () => {
+    try {
+      const value = await navigator.clipboard.readText()
+      setInviteCode(normalizeInviteCode(value))
+      setError(null)
+      document.getElementById('invite-code')?.focus()
+    } catch {
+      setError('Не вдалося прочитати буфер обміну. Натисніть і утримуйте поле, щоб вставити код.')
+    }
+  }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -80,7 +91,7 @@ export function JoinSpacePage() {
                 maxLength={18}
                 spellCheck={false}
               />
-              {inviteCode && (
+              {inviteCode ? (
                 <button
                   className="invite-code-clear interactive"
                   type="button"
@@ -92,6 +103,16 @@ export function JoinSpacePage() {
                   aria-label="Очистити код запрошення"
                 >
                   <X size={17} strokeWidth={1.5} aria-hidden="true" />
+                </button>
+              ) : (
+                <button
+                  className="invite-code-paste interactive"
+                  type="button"
+                  onClick={() => void handlePaste()}
+                  aria-label="Вставити код із буфера обміну"
+                >
+                  <ClipboardPaste size={15} strokeWidth={1.5} aria-hidden="true" />
+                  <span>Вставити</span>
                 </button>
               )}
             </div>

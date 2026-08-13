@@ -25,6 +25,8 @@ Types are `income` and `expense`. The user enters an unsigned amount; type defin
 
 Default expense categories: Продукти, Житло, Транспорт, Заклади, Покупки, Розваги, Здоров’я, Тварини, Інше. Default income categories: Зарплата, Підробіток, Подарунок, Інвестиції, Інше.
 
+Categories are space-level vocabulary, not a universal taxonomy. Members may add a precise category such as `Айва`, `Сигарети`, `Жабка`, or `Інтернет`; authorized managers may rename or archive categories without rewriting historical operations. Everyone in the space sees the same category set.
+
 Recurrence frequencies: weekly, monthly, yearly. A server-side scheduler must safely create a new transaction; recurrence must never be simulated only in frontend state.
 
 History search: category, comment, person, amount. Filters: all, income, expense, today, 7 days, 30 days, current month, all time, custom period, category, person.

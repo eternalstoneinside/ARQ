@@ -4,7 +4,7 @@ import { AppHeader } from '../components/layout/AppHeader'
 import { TransactionList } from '../components/transactions/TransactionList'
 import { StateView } from '../components/ui/StateView'
 import { useTransactions } from '../context/transactions-context'
-import { categories } from '../data/mock'
+import { useCategories } from '../context/categories-context'
 import type { Transaction } from '../domain/types'
 import { filterTransactions, type TransactionFilter } from '../lib/transactions'
 
@@ -28,12 +28,13 @@ function groupLabel(date: string) {
 
 export function TransactionsPage() {
   const [filter, setFilter] = useState<TransactionFilter>('all')
+  const { categories } = useCategories()
   const [query, setQuery] = useState('')
   const { transactions, loading, error, refreshTransactions } = useTransactions()
 
   const filtered = useMemo(
     () => filterTransactions(transactions, filter, query, categories),
-    [filter, query, transactions],
+    [categories, filter, query, transactions],
   )
 
   const groups = filtered.reduce<Record<string, Transaction[]>>((result, transaction) => {

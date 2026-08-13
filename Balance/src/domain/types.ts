@@ -15,6 +15,14 @@ export interface Category {
   icon: string
 }
 
+export interface SpaceCategory extends Category {
+  archivedAt: string | null
+  createdBy: string
+  isDefault: boolean
+  sortOrder: number
+  spaceId: string
+}
+
 export interface Transaction {
   id: string
   spaceId: string
