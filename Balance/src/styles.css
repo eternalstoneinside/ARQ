@@ -523,11 +523,12 @@ a[x-apple-data-detectors-type] {
 .detail-hero h1 { margin: 1.05rem 0 0; font-size: 1.15rem; font-weight: 600; }
 .detail-hero p { margin: .55rem 0 0; font-family: var(--font-display); font-size: 1.7rem; font-weight: 480; letter-spacing: -.035em; }
 .detail-hero p small { font-size: .65rem; }
-.detail-hero > span { display: block; margin-top: .55rem; color: var(--ink-muted); font-size: .62rem; }
+.detail-hero > span { display: block; margin-top: .55rem; color: #565952; font-size: .62rem; font-weight: 430; -webkit-text-fill-color: #565952; }
 .detail-list { margin: 0; border-top: 1px solid var(--border-subtle); }
 .detail-list div { padding: .75rem 0; border-bottom: 1px solid var(--border-subtle); }
 .detail-list dt { color: var(--ink-muted); font-size: .58rem; }
-.detail-list dd { margin: .25rem 0 0; font-size: .7rem; font-weight: 550; }
+.detail-list dd { margin: .25rem 0 0; color: var(--ink); font-size: .7rem; font-weight: 550; -webkit-text-fill-color: var(--ink); }
+.detail-list div:last-child { border-bottom: 0; }
 .secondary-action {
   display: inline-flex;
   min-height: 3rem;
@@ -535,7 +536,7 @@ a[x-apple-data-detectors-type] {
   justify-content: center;
   gap: .45rem;
   margin-top: auto;
-  border: 1px solid var(--border-subtle);
+  border: 0;
   border-radius: .65rem;
   background: var(--surface-muted);
   color: var(--ink);
@@ -557,10 +558,10 @@ a[x-apple-data-detectors-type] {
 }
 .space-card span, .profile-summary > span:last-child, .settings-list button > span:not(.avatar) { display: flex; flex-direction: column; }
 .space-card strong, .profile-summary strong, .settings-list strong { font-size: .86rem; font-weight: 510; letter-spacing: -.01em; }
-.space-card small, .profile-summary small, .settings-list small { margin-top: .28rem; color: var(--ink-muted); font-size: .7rem; font-weight: 390; line-height: 1.4; }
+.space-card small, .profile-summary small, .settings-list small { margin-top: .28rem; color: #565952; font-size: .7rem; font-weight: 430; line-height: 1.4; -webkit-text-fill-color: #565952; }
 .settings-section h2 { margin: 0 0 .7rem; color: var(--ink-muted); font-size: .64rem; font-weight: 570; letter-spacing: .12em; text-transform: uppercase; }
 .settings-section__heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
-.settings-section__heading > span { max-width: 60%; overflow: hidden; color: #62645f; font-size: .72rem; font-weight: 430; text-overflow: ellipsis; white-space: nowrap; }
+.settings-section__heading > span { max-width: 60%; overflow: hidden; color: #50534d; font-size: .72rem; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; -webkit-text-fill-color: #50534d; }
 .settings-list { border-top: 1px solid var(--border-subtle); }
 .settings-list button {
   display: flex;
@@ -595,7 +596,7 @@ a[x-apple-data-detectors-type] {
 .profile-summary { display: flex; align-items: center; gap: .9rem; padding: .3rem 0 1.15rem; border-bottom: 1px solid var(--border-subtle); }
 .profile-summary__copy { min-width: 0; }
 .profile-summary__copy strong { overflow: hidden; color: var(--ink); text-overflow: ellipsis; white-space: nowrap; -webkit-text-fill-color: var(--ink); }
-.profile-summary__copy small { overflow: hidden; color: #686a64; text-overflow: ellipsis; white-space: nowrap; -webkit-text-fill-color: #686a64; }
+.profile-summary__copy small { overflow: hidden; color: #50534d; font-weight: 450; text-overflow: ellipsis; white-space: nowrap; -webkit-text-fill-color: #50534d; }
 .danger-link {
   display: inline-flex;
   align-items: center;
@@ -1145,7 +1146,7 @@ button.members-list__row:hover { background: color-mix(in srgb, var(--accent-sof
 .sheet-fields label {
   position: relative;
   display: grid;
-  grid-template-columns: 1.25rem 1fr minmax(5rem, auto) 1rem;
+  grid-template-columns: 1.25rem minmax(5rem, .78fr) minmax(0, 1.22fr) 1rem;
   min-height: 3.25rem;
   align-items: center;
   gap: .45rem;
@@ -1154,15 +1155,18 @@ button.members-list__row:hover { background: color-mix(in srgb, var(--accent-sof
 }
 .sheet-fields strong { color: var(--ink); font-size: .68rem; font-weight: 550; }
 .sheet-fields select, .sheet-fields input {
+  min-width: 0;
   width: 100%;
   padding: 0;
   border: 0;
   outline: 0;
   appearance: none;
   background: transparent;
-  color: var(--ink-muted);
+  color: #565952;
   font-size: .62rem;
   text-align: right;
+  text-overflow: ellipsis;
+  -webkit-text-fill-color: #565952;
 }
 .sheet-fields label { transition: border-color 150ms ease, box-shadow 150ms ease; }
 .sheet-fields label:focus-within {
