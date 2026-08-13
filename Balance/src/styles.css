@@ -49,7 +49,11 @@ html {
   text-rendering: optimizeLegibility;
   text-size-adjust: 100%;
 }
-body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--canvas); color: var(--ink); }
+body, #root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+body { margin: 0; min-width: 320px; background: var(--canvas); color: var(--ink); }
 button, input, select, textarea { font: inherit; }
 button, a, input, select, textarea { touch-action: manipulation; }
 button, a { -webkit-tap-highlight-color: transparent; }
@@ -899,6 +903,8 @@ button.members-list__row:hover { background: color-mix(in srgb, var(--accent-sof
   width: min(100%, 28rem);
   max-height: 90dvh;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: .7rem 1.35rem max(1.35rem, env(safe-area-inset-bottom));
   border: 1px solid rgb(255 255 255 / 30%);
   border-bottom: 0;
@@ -913,6 +919,8 @@ button.members-list__row:hover { background: color-mix(in srgb, var(--accent-sof
   width: min(100%, 28rem);
   max-height: 90dvh;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: .7rem 1.35rem max(1.35rem, env(safe-area-inset-bottom));
   border: 1px solid rgb(255 255 255 / 30%);
   border-bottom: 0;
@@ -925,6 +933,8 @@ button.members-list__row:hover { background: color-mix(in srgb, var(--accent-sof
   width: min(100%, 28rem);
   max-height: 88dvh;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: .7rem 1.35rem max(1.35rem, env(safe-area-inset-bottom));
   border: 1px solid rgb(255 255 255 / 30%);
   border-bottom: 0;
@@ -1871,7 +1881,7 @@ button.members-list__row:hover { background: color-mix(in srgb, var(--accent-sof
   .auth-separator { margin-top: 1rem; }
   .other-signin { margin-top: .55rem; }
   .welcome-legal-motion { margin-top: 1.35rem; }
-  .legal-notice { font-size: .56rem; }
+  .legal-notice { font-size: .64rem; }
   .decision-content { padding-top: max(1.25rem, calc(env(safe-area-inset-top) + .75rem)); }
   .decision-wordmark { width: 5.4rem; }
   .decision-wordmark span { margin-top: .35rem; font-size: .43rem; }
@@ -1905,9 +1915,24 @@ button.members-list__row:hover { background: color-mix(in srgb, var(--accent-sof
 }
 
 @media (hover: none) and (pointer: coarse) {
+  .simple-header--centered { grid-template-columns: 2.75rem 1fr 2.75rem; }
+  .space-switcher,
+  .analytics-tabs button { min-height: 44px; }
+
+  .icon-button,
+  .spaces-list__menu,
+  .category-icon-options button,
+  .category-manager-list__action,
+  .invite-code-clear,
+  .invite-code-paste {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
   .analytics-period select,
   .search-field input,
   .space-sheet__field input,
+  .category-form > label input,
   .sheet-fields select,
   .sheet-fields input,
   .invite-code-field input {

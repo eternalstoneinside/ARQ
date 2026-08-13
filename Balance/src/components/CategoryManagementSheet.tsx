@@ -40,6 +40,21 @@ export function CategoryManagementSheet({ open, onClose }: { open: boolean; onCl
     if (!open) resetForm()
   }, [open])
 
+  useEffect(() => {
+    if (!open) return
+    const previousOverflow = document.body.style.overflow
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !working) onClose()
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [onClose, open, working])
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     if (!name.trim() || working) return
